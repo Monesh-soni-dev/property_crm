@@ -1,0 +1,7 @@
+<nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-4">
+  <%= link_to "Home", root_path, class: "text-blue-600 hover:underline" %>
+  <% if content_for?(:breadcrumbs) %>
+    <span>/</span>
+    <%= yield :breadcrumbs %>
+  <% end %>
+</nav>

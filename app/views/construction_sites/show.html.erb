@@ -1,0 +1,72 @@
+<% breadcrumbs ["Projects", projects_path],
+               [@site.project.name, project_path(@site.project)],
+               ["Construction", "#"] %>
+
+<div class="flex items-start justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-['Playfair_Display'] font-semibold">
+      Construction — <%= @site.project.name %>
+    </h1>
+    <p class="text-sm text-gray-400 mt-1">
+      Site manager: <%= @site.site_manager %> · Overall progress: <%= @site.overall_progress %>%
+    </p>
+  </div>
+  <div class="flex gap-2">
+    <% if @site.milestones.any? %>
+      <%= link_to "Upload photo", new_project_construction_site_milestone_site_document_path(@site.project, @site.milestones.first), class: "btn-ghost text-sm px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition" %>
+    <% else %>
+      <span class="inline-flex items-center text-sm px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-500">Add a milestone first</span>
+    <% end %>
+    <%= link_to "Add milestone", new_project_construction_site_milestone_path(@site.project), class: "bg-[#1a2e4a] text-white text-sm px-4 py-2 rounded-lg hover:bg-[#2a4a72] transition" %>
+  </div>
+</div>
+
+<%# Overall progress banner %>
+<div class="bg-white border border-gray-200 rounded-xl px-5 py-4 mb-5 flex items-center gap-5">
+  <span class="text-sm font-medium text-gray-500">Overall site progress</span>
+  <div class="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+    <div class="h-full bg-blue-500 rounded-full transition-all duration-500"
+         style="width:<%= @site.overall_progress %>%"></div>
+  </div>
+  <span class="text-xl font-['Playfair_Display'] font-semibold text-[#1a2e4a]">
+    <%= @site.overall_progress %>%
+  </span>
+</div>
+
+<%# Milestone list %>
+<div class="space-y-3">
+  <% @site.milestones.order(:planned_date).each do |ms| %>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-800"><%= ms.title %></h3>
+          <p class="text-xs text-gray-400 mt-0.5">
+            <%= ms.construction_tasks.count %> tasks ·
+            <%= ms.construction_tasks.completed.count %> done
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-gray-400 mb-1">Due: <%= ms.planned_date.strftime("%d %b %Y") %></p>
+          <span class="text-xs px-2.5 py-0.5 rounded-full
+            <%= ms.status == 'completed' ? 'bg-green-50 text-green-800' : ms.status == 'in_progress' ? 'bg-blue-50 text-blue-800' : 'bg-gray-100 text-gray-500' %>">
+            <%= ms.status.humanize %>
+          </span>
+        </div>
+      </div>
+
+      <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
+        <div class="h-full rounded-full transition-all
+          <%= ms.completion_pct >= 100 ? 'bg-green-500' : ms.completion_pct >= 60 ? 'bg-blue-500' : ms.completion_pct >= 30 ? 'bg-amber-500' : 'bg-red-400' %>"
+             style="width:<%= ms.completion_pct %>%"></div>
+      </div>
+
+      <div class="flex gap-4 text-xs text-gray-400">
+        <span><%= ms.completion_pct %>% complete</span>
+        <span><%= ms.construction_tasks.pending.count %> tasks pending</span>
+        <span><%= ms.site_documents.count %> photos/docs</span>
+        <%= link_to "View tasks", project_construction_site_milestone_path(@site.project, ms),
+              class: "ml-auto text-blue-600 hover:underline" %>
+      </div>
+    </div>
+  <% end %>
+</div>

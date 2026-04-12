@@ -1,0 +1,29 @@
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-['Playfair_Display'] font-semibold">Lead pipeline</h1>
+    <p class="text-sm text-gray-400 mt-1"><%= @leads_by_stage.values.flatten.count %> active leads</p>
+  </div>
+  <%= link_to "New lead", new_lead_path,
+        class: "flex items-center gap-1.5 bg-[#1a2e4a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2a4a72] transition" %>
+</div>
+
+<div class="grid grid-cols-5 gap-3" data-controller="sortable">
+  <% Lead.stages.each_key do |stage| %>
+    <div class="bg-stone-50 rounded-xl p-2.5">
+      <div class="flex items-center justify-between mb-2.5 px-1">
+        <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+          <%= stage.humanize %>
+        </span>
+        <span class="bg-gray-200 text-gray-600 text-[10px] rounded-full px-2 py-px font-medium">
+          <%= @leads_by_stage[stage]&.count || 0 %>
+        </span>
+      </div>
+
+      <div id="stage_<%= stage %>" class="space-y-2 min-h-16">
+        <% @leads_by_stage[stage]&.each do |lead| %>
+          <%= render "leads/card", lead: lead %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

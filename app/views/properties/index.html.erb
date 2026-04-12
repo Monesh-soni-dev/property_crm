@@ -1,0 +1,62 @@
+
+<% breadcrumbs ["Projects", projects_path], ["Properties", "#"] %>
+
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-['Playfair_Display'] font-semibold">
+      <%= @project.present? ? "Properties for #{@project.name}" : "All Properties" %>
+    </h1>
+    <p class="text-sm text-gray-400 mt-1"><%= @properties.count %> units · <%= @project&.name || "All projects" %></p>
+  </div>
+  <div class="flex gap-2">
+    <%= search_form_for @q, url: properties_path, class: "flex gap-2" do |f| %>
+      <%= f.select :status_eq, Property.statuses.keys.map { |s| [s.humanize, s] },
+            { include_blank: "All status" },
+            class: "text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white" %>
+      <%= f.select :property_type_eq, ["1 BHK","2 BHK","3 BHK","4 BHK","Villa"],
+            { include_blank: "All types" },
+            class: "text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white" %>
+      <%= f.submit "Filter", class: "text-xs bg-white border border-gray-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-50" %>
+    <% end %>
+    <% if @project.present? %>
+      <%= link_to new_project_property_path(@project), class: "flex items-center gap-1.5 bg-[#1a2e4a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2a4a72] transition" do %>
+        <span class="text-lg leading-none">+</span> Add unit
+      <% end %>
+    <% else %>
+      <%= link_to "Choose a project", projects_path, class: "flex items-center gap-1.5 bg-[#1a2e4a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2a4a72] transition" %>
+    <% end %>
+  </div>
+</div>
+
+<div class="grid grid-cols-3 gap-4">
+  <% @properties.each do |property| %>
+    <%= link_to project_property_path(@project || property.project, property),
+          class: "bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 transition group block" do %>
+      <div class="h-32 bg-stone-100 relative flex items-center justify-center">
+        <% if property.images.attached? %>
+          <%= image_tag property.images.first, class: "w-full h-full object-cover" %>
+        <% else %>
+          <%= inline_svg "home.svg", class: "w-10 h-10 fill-gray-300" %>
+        <% end %>
+        <span class="absolute top-2 right-2 px-2.5 py-0.5 rounded-full text-[10px] font-semibold
+          <%= property.available? ? 'bg-green-50 text-green-800' : property.sold? ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800' %>">
+          <%= property.status.humanize %>
+        </span>
+      </div>
+      <div class="p-3.5">
+        <p class="text-sm font-semibold text-gray-800"><%= property.title %></p>
+        <p class="text-xs text-gray-400 mt-0.5"><%= property.project.name %> · Floor <%= property.floor %></p>
+        <div class="flex gap-2.5 mt-2 text-xs text-gray-500">
+          <span><%= property.area %> sq ft</span>
+          <span><%= property.bedrooms %> bed</span>
+          <span><%= property.bathrooms %> bath</span>
+        </div>
+        <p class="text-sm font-semibold text-[#1a2e4a] mt-2">
+          ₹ <%= number_to_indian(property.price) %>
+        </p>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<%== pagy_nav(@pagy) if @pagy.pages > 1 %>

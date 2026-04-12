@@ -1,0 +1,29 @@
+<aside class="w-52 bg-white border-r border-gray-200 py-4 flex-shrink-0">
+
+  <div class="px-3 mb-5">
+    <p class="sidebar-label">Overview</p>
+    <%= sidebar_item "Dashboard",  root_path,       "grid.svg" %>
+    <%= sidebar_item "Projects",   projects_path,   "book.svg",
+          badge: current_user&.projects&.count %>
+  </div>
+
+  <div class="px-3 mb-5">
+    <p class="sidebar-label">Sales</p>
+    <%= sidebar_item "Properties", properties_path, "home.svg" %>
+    <%#= sidebar_item "Leads",      leads_path,      "users.svg",
+          badge: Lead.active.count, badge_color: "accent" %>
+  </div>
+
+  <div class="px-3 mb-5">
+    <p class="sidebar-label">Site</p>
+    <%#= sidebar_item "Construction", construction_sites_path, "layers.svg" %>
+    <%#= sidebar_item "Workers",      workers_path,            "user.svg" %>
+    <%#= sidebar_item "Materials",    materials_path,          "box.svg",
+          badge: Material.low_stock.count, badge_color: "red" %>
+  </div>
+
+  <div class="px-3">
+    <p class="sidebar-label">Repo   rts</p>
+    <%= sidebar_item "Analytics", admin_reports_path, "bar-chart.svg" %>
+  </div>
+</aside>

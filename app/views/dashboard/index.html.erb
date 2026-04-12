@@ -1,0 +1,105 @@
+
+<div class="flex items-start justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-['Playfair_Display'] font-semibold">
+      <%= current_user.first_name %>
+    </h1>
+    <p class="text-sm text-gray-400 mt-1">
+      Last updated today at <%= Time.now.strftime("%I:%M %p") %>
+    </p>
+  </div>
+  <%#= link_to "Add lead", new_lead_path,
+        class: "flex items-center gap-1.5 bg-[#1a2e4a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2a4a72] transition" %>
+</div>
+
+<%# Stat cards %>
+<div class="grid grid-cols-4 gap-3.5 mb-6">
+#   <%#= render "dashboard/stat_card",
+#         icon: "home.svg", icon_bg: "bg-blue-50", icon_color: "stroke-blue-700",
+#         label: "Total units", value: @total_units, sub: "↑ 12 listed this week", sub_color: "text-green-600" %>
+  <%#= render "dashboard/stat_card",
+        icon: "users.svg", icon_bg: "bg-green-50", icon_color: "stroke-green-700",
+        label: "Active leads", value: @active_leads, sub: "↑ 6 this week", sub_color: "text-green-600" %>
+  <%#= render "dashboard/stat_card",
+        icon: "gift.svg", icon_bg: "bg-amber-50", icon_color: "stroke-amber-700",
+        label: "Bookings", value: @bookings,
+        sub: "₹#{number_to_human(@revenue, units: { thousand: 'L', lakh: 'Cr' })} revenue",
+        sub_color: "text-green-600" %>
+  <%#= render "dashboard/stat_card",
+        icon: "layers.svg", icon_bg: "bg-purple-50", icon_color: "stroke-purple-700",
+        label: "Site progress", value: "#{@milestones.first&.overall_progress || 0}%",
+        sub: "On schedule", sub_color: "text-green-600" %>
+</div>
+
+<div class="grid grid-cols-2 gap-4 mb-4">
+  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+      <span class="text-sm font-semibold">Lead pipeline summary</span>
+      <%= link_to "View projects", projects_path, class: "text-xs text-blue-600" %>
+    </div>
+    <div class="p-4 space-y-3">
+      <% Lead.stages.each_key do |stage| %>
+        <% count = @leads_by_stage[stage] || 0 %>
+        <% max = @leads_by_stage.values.max || 1 %>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-gray-400 w-24"><%= stage.humanize %></span>
+          <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-blue-500 rounded-full"
+                 style="width:<%= (count.to_f/max*100).round %>%"></div>
+          </div>
+          <span class="text-xs font-medium w-5 text-right"><%= count %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+      <span class="text-sm font-semibold">Milestone progress</span>
+      <%= link_to "View projects", projects_path, class: "text-xs text-blue-600" %>
+    </div>
+    <div class="p-4 space-y-3">
+      <% if @milestones.any? %>
+        <% @milestones.first&.milestones&.each do |ms| %>
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="font-medium text-gray-700"><%= ms.title.truncate(30) %></span>
+            <span class="<%= ms.completion_pct >= 100 ? 'text-green-600' : ms.completion_pct > 50 ? 'text-blue-600' : 'text-amber-600' %>">
+              <%= ms.completion_pct %>%
+            </span>
+          </div>
+          <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full rounded-full <%= ms.completion_pct >= 100 ? 'bg-green-500' : ms.completion_pct > 50 ? 'bg-blue-500' : 'bg-amber-500' %>"
+                 style="width:<%= ms.completion_pct %>%"></div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-sm text-gray-400">No milestones found. Add milestones to construction sites to track progress here.</p>
+    <% end %>
+    </div>
+  </div>
+</div>
+
+
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+  <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+    <span class="text-sm font-semibold">Recent activities</span>
+    <span class="text-xs text-gray-400">Last 24 hours</span>
+  </div>
+  <div class="divide-y divide-gray-50">
+    <% @recent_activities.each do |act| %>
+      <div class="flex items-start gap-3 px-4 py-3">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0
+                    <%= act.activity_type == 'call' ? 'bg-blue-500' : act.activity_type == 'note' ? 'bg-green-500' : 'bg-purple-500' %>">
+          <%= inline_svg "#{act.activity_type}.svg", class: "w-3.5 h-3.5 fill-white" %>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-800"><%= act.description.truncate(60) %></p>
+          <p class="text-xs text-gray-400 mt-0.5"><%= act.lead&.name %> · <%= act.lead&.project&.name %></p>
+        </div>
+        <span class="text-xs text-gray-400 flex-shrink-0"><%= time_ago_in_words(act.occurred_at) %> ago</span>
+      </div>
+    <% end %>
+  </div>
+</div>
