@@ -18,18 +18,4 @@ module ApplicationHelper
       end.join.html_safe
     end
   end
-  def sidebar_item(label, path, icon, badge: nil, badge_color: "brand")
-    active = request.path.start_with?(path.to_s)
-    active_css = active ? "bg-blue-50 text-blue-800 font-medium" : "text-gray-500 hover:bg-stone-100 hover:text-gray-800"
-    badge_css  = { "accent" => "bg-[#e8834a]", "red" => "bg-red-500", "brand" => "bg-[#1a2e4a]" }
-
-    link_to path, class: "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition #{active_css}" do
-        concat inline_svg(icon, class: "w-3.5 h-3.5 flex-shrink-0 opacity-70")
-        concat content_tag(:span, label)
-        if badge && badge > 0
-        concat content_tag(:span, badge,
-            class: "ml-auto #{badge_css[badge_color]} text-white rounded-full px-1.5 py-px text-[10px] font-semibold")
-        end
-    end
-  end
 end

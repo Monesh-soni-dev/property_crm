@@ -1,241 +1,72 @@
-/* Header & Footer Animations and Enhancements */
+/* Minimal header and footer styling for simpler pages */
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+body {
+  margin: 0;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-@keyframes glow-pulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(232, 131, 74, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(232, 131, 74, 0.5);
-  }
+button, a {
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-@keyframes slide-down {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+header, footer {
+  width: 100%;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+main {
+  min-height: calc(100vh - 152px);
 }
 
-@keyframes bounce-soft {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
+.bg-brand {
+  background: linear-gradient(90deg, #1b3d72 0%, #2b5a95 45%, #1c345e 100%);
 }
 
-/* Apply animations */
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+.bg-accent {
+  background-color: #e8834a;
 }
 
-.animate-glow-pulse {
-  animation: glow-pulse 2s ease-in-out infinite;
+.text-accent {
+  color: #f5a870;
 }
 
-.animate-slide-down {
-  animation: slide-down 0.3s ease-out;
+.text-brand {
+  color: #1a2e4a;
 }
 
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out;
+.footer-link {
+  color: #cbd5e1;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.animate-bounce-soft {
-  animation: bounce-soft 2s ease-in-out infinite;
-}
-
-/* Header specific styles */
-header {
-  animation: fade-in 0.5s ease-out;
+.footer-link:hover {
+  color: #ffffff;
+  transform: translateX(2px);
 }
 
 header a {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: inherit;
 }
 
-/* Smooth transitions for interactive elements */
-button, a {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+header .rounded-2xl {
+  border-radius: 1rem;
 }
 
-/* Footer specific styles */
-footer {
-  animation: slide-down 0.6s ease-out;
+.shadow-[0_20px_50px_-24px_rgba(15,23,42,0.8)] {
+  box-shadow: 0 20px 50px -24px rgba(15, 23, 42, 0.8);
 }
 
-footer a {
-  position: relative;
-}
-
-footer a::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(to right, #e8834a, #f5a870);
-  transition: width 0.3s ease-out;
-}
-
-footer a:hover::after {
-  width: 100%;
-}
-
-/* Brand logo hover effect */
-.brand-logo {
-  position: relative;
-  overflow: hidden;
-}
-
-.brand-logo::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  animation: shimmer 3s infinite;
-}
-
-/* Dropdown menu smooth appearance */
-.dropdown-menu {
-  animation: slide-down 0.2s ease-out;
-}
-
-/* Icon hover effects */
-.icon-hover {
-  transition: all 0.3s ease;
-}
-
-.icon-hover:hover {
-  transform: scale(1.1) rotate(5deg);
-}
-
-/* User avatar gradient animation */
-.avatar-gradient {
-  background: linear-gradient(135deg, #e8834a, #f5a870);
-  animation: glow-pulse 3s ease-in-out infinite;
-}
-
-/* Button boost effect */
-.btn-boost:hover {
-  box-shadow: 0 20px 40px rgba(232, 131, 74, 0.4);
-  transform: translateY(-2px);
-}
-
-.btn-boost:active {
-  transform: translateY(0);
-}
-
-/* Social icons animation */
-.social-icon {
-  transition: all 0.3s ease;
-}
-
-.social-icon:hover {
-  transform: translateY(-4px) scale(1.1);
-}
-
-/* Text gradient effect */
-.text-gradient {
-  background: linear-gradient(135deg, #ffffff, #f5a870);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  transition: all 0.3s ease;
-}
-
-.text-gradient:hover {
-  background: linear-gradient(135deg, #f5a870, #ffffff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Responsive improvements */
 @media (max-width: 768px) {
-  header {
-    height: auto;
-    padding: 1rem 1rem;
+  main {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
-
-  footer {
-    padding: 2rem 1rem;
-  }
-
-  footer .grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-}
-
-/* Loading and transition states */
-.transition-smooth {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Glass morphism effect for modals */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Focus states for accessibility */
-button:focus,
-a:focus {
-  outline: 2px solid #e8834a;
-  outline-offset: 2px;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -247,13 +78,11 @@ a:focus {
   background: rgba(232, 131, 74, 0.7);
 }
 
-/* Performance optimization */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Print styles */
 @media print {
   header,
   footer {
