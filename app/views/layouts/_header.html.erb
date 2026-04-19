@@ -1,28 +1,39 @@
-<header class="bg-brand text-white shadow-[0_20px_50px_-24px_rgba(15,23,42,0.8)]">
-  <div class="max-w-6xl mx-auto flex flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8 md:flex-row md:items-center md:justify-between">
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-      <%= link_to root_path, class: "inline-flex items-center gap-3" do %>
-        <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-sm font-semibold text-white shadow-lg">PP</span>
-        <div>
-          <p class="text-lg font-semibold tracking-tight text-white">PlotPlans</p>
-          <p class="text-sm text-slate-200">Modern construction workspace</p>
-        </div>
-      <% end %>
+<header class="navbar bg-gradient-to-r from-blue-200 via-amber-200 to-blue-300 shadow-2xl border-b border-amber-300">
+  <div class="container flex items-center justify-between px-4 py-4 mx-auto max-w-6xl">
+    <!-- Logo -->
+    <div class="logo flex items-center gap-3">
+      <div class="w-12 h-12 rounded-xl bg-white shadow-xl flex items-center justify-center text-amber-600 font-bold text-lg transform hover:scale-105 transition duration-200">PP</div>
+      <div>
+        <%= link_to root_path, class: "text-slate-900 text-xl font-bold hover:text-slate-700 transition duration-200" do %>
+          PlotPlans
+        <% end %>
+      </div>
     </div>
 
-    <nav class="flex flex-wrap items-center justify-center gap-3 text-sm text-white">
-      <%= link_to "Dashboard", root_path, class: "rounded-full bg-white/10 px-4 py-2 text-white transition hover:bg-white/20 hover:text-white" %>
-      <%= link_to "Properties", properties_path, class: "rounded-full bg-white/10 px-4 py-2 text-white transition hover:bg-white/20 hover:text-white" %>
+    <!-- Navigation -->
+  
+    <!-- Auth Section -->
+    <div class="cta flex items-center gap-2">
+      <nav class="nav-links hidden md:flex items-center gap-4 text-sm">
+      <%#= link_to "Home", root_path, class: "text-slate-900/90 hover:text-slate-900 hover:bg-white/40 px-3 py-2 rounded-lg transition duration-200 font-medium" %>
+      <%= link_to "Properties", properties_path, class: "text-slate-900/90 hover:text-slate-900 hover:bg-white/40 px-3 py-2 rounded-lg transition duration-200 font-medium" %>
+      <%= link_to "Projects", projects_path, class: "text-slate-900/90 hover:text-slate-900 hover:bg-white/40 px-3 py-2 rounded-lg transition duration-200 font-medium" %>
+      <%= link_to "Properties Leads", "#", class: "text-slate-900/90 hover:text-slate-900 hover:bg-white/40 px-3 py-2 rounded-lg transition duration-200 font-medium" %>
     </nav>
 
-    <div class="flex flex-wrap items-center justify-end gap-3">
       <% if user_signed_in? %>
-        <span class="rounded-full bg-white/15 px-3 py-2 text-sm text-white"><%= current_user&.initials %></span>
-        <span class="hidden text-sm text-slate-200 sm:inline"><%= current_user&.full_name %></span>
-        <%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand transition hover:bg-slate-100 hover:text-brand" %>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1 bg-white/25 rounded-full px-3 py-2">
+            <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-amber-700 font-semibold text-sm">
+              <%= current_user&.initials %>
+            </div>
+            <span class="text-slate-900 text-sm font-medium hidden sm:inline"><%= current_user&.full_name || current_user&.email %></span>
+          </div>
+          <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "bg-amber-700 text-white px-4 py-2 rounded-lg font-medium transition duration-200 shadow-md hover:bg-amber-600 border-0 cursor-pointer" %>
+        </div>
       <% else %>
-        <%= link_to "Sign In", new_user_session_path, class: "text-sm text-white/90 hover:text-white" %>
-        <%= link_to "Sign Up", new_user_registration_path, class: "inline-flex items-center rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-[#f5b972]" %>
+        <%= link_to "Sign In", new_user_session_path, class: "text-slate-900/90 hover:text-slate-900 hover:bg-white/40 px-4 py-2 rounded-lg font-medium transition duration-200" %>
+        <%= link_to "Sign Up", new_user_registration_path, class: "bg-amber-700 text-white hover:bg-amber-600 px-4 py-2 rounded-lg font-semibold transition duration-200 shadow-md hover:shadow-lg" %>
       <% end %>
     </div>
   </div>

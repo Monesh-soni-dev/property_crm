@@ -4,6 +4,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   enum role: {builder:  'builder',admin:    'admin',agent:    'agent',engineer: 'engineer'}
+  has_many :projects, dependent: :destroy
 
   # Validations
   validates :email, presence: true, uniqueness: true

@@ -1,0 +1,19 @@
+<header class="bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-6xl mx-auto flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-3">
+      <%= link_to root_path, class: "inline-flex items-center gap-2" do %>
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">PP</span>
+        <p class="text-lg font-semibold text-gray-900">PlotPlans</p>
+      <% end %>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <% if user_signed_in? %>
+        <%= link_to "Dashboard", root_path, class: "text-sm text-gray-600 hover:text-gray-900" %>
+        <%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "text-sm text-gray-600 hover:text-gray-900" %>
+      <% else %>
+        <%= link_to "Sign Up", new_user_registration_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+      <% end %>
+    </div>
+  </div>
+</header>

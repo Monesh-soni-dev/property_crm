@@ -1,0 +1,13 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+      <%= link_to "← Back to Project", @project, class: "text-amber-700 hover:text-amber-600 mb-4 inline-block font-medium transition duration-200" %>
+      <h1 class="text-3xl font-bold text-gray-900">Edit Project</h1>
+      <p class="text-gray-600 mt-2">Update project information</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <%= render "form", project: @project %>
+    </div>
+  </div>
+</div>

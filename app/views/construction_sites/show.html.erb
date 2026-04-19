@@ -49,7 +49,7 @@
           <p class="text-xs text-gray-400 mb-1">Due: <%= ms.planned_date.strftime("%d %b %Y") %></p>
           <span class="text-xs px-2.5 py-0.5 rounded-full
             <%= ms.status == 'completed' ? 'bg-green-50 text-green-800' : ms.status == 'in_progress' ? 'bg-blue-50 text-blue-800' : 'bg-gray-100 text-gray-500' %>">
-            <%= ms.status.humanize %>
+            <%= ms.status&.humanize || 'Unknown' %>
           </span>
         </div>
       </div>

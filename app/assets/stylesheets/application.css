@@ -13,3 +13,26 @@
  *= require_tree .
  *= require_self
  */
+.navbar {
+  /* Removed background override to allow Tailwind gradient classes */
+  border-bottom: none;
+  padding: 0;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.nav-links a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.btn-primary {
+  background: green;
+  color: white;
+  padding: 5px 10px;
+  text-decoration: none;
+}

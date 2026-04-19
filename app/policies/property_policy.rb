@@ -5,6 +5,34 @@ class PropertyPolicy < ApplicationPolicy
   # code, beware of possible changes to the ancestors:
   # https://gist.github.com/Burgestrand/4b4bc22f31c8a95c425fc0e30d7ef1f5
 
+  def index?
+    true  # Allow anyone to view properties list
+  end
+
+  def show?
+    true  # Allow anyone to view individual properties
+  end
+
+  def create?
+    user.present? && (record.user == user || user.admin?)
+  end
+
+  def new?
+    create?
+  end
+
+  def update?
+    user.present? && (record.user == user || user.admin?)
+  end
+
+  def edit?
+    update?
+  end
+
+  def destroy?
+    user.present? && (record.user == user || user.admin?)
+  end
+
   class Scope < ApplicationPolicy::Scope
     # NOTE: Be explicit about which records you allow access to!
     def resolve

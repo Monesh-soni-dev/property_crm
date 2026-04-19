@@ -1,5 +1,9 @@
 
-<% breadcrumbs ["Projects", projects_path], ["Properties", "#"] %>
+<% if user_signed_in? %>
+  <% breadcrumbs ["Projects", projects_path], ["Properties", "#"] %>
+<% else %>
+  <% breadcrumbs ["Properties", "#"] %>
+<% end %>
 
 <div class="flex items-center justify-between mb-6">
   <div>
@@ -18,11 +22,11 @@
             class: "text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white" %>
       <%= f.submit "Filter", class: "text-xs bg-white border border-gray-200 rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-50" %>
     <% end %>
-    <% if @project.present? %>
+    <% if @project.present? && user_signed_in? %>
       <%= link_to new_project_property_path(@project), class: "flex items-center gap-1.5 bg-[#1a2e4a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2a4a72] transition" do %>
         <span class="text-lg leading-none">+</span> Add unit
       <% end %>
-    <% else %>
+    <% elsif !@project.present? && user_signed_in? %>
       <%= link_to "Choose a project", projects_path, class: "flex items-center gap-1.5 bg-[#1a2e4a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2a4a72] transition" %>
     <% end %>
   </div>
@@ -40,7 +44,7 @@
         <% end %>
         <span class="absolute top-2 right-2 px-2.5 py-0.5 rounded-full text-[10px] font-semibold
           <%= property.available? ? 'bg-green-50 text-green-800' : property.sold? ? 'bg-red-50 text-red-800' : 'bg-amber-50 text-amber-800' %>">
-          <%= property.status.humanize %>
+          <%= property.status&.humanize || 'Unknown' %>
         </span>
       </div>
       <div class="p-3.5">
@@ -52,11 +56,19 @@
           <span><%= property.bathrooms %> bath</span>
         </div>
         <p class="text-sm font-semibold text-[#1a2e4a] mt-2">
-          ₹ <%= number_to_indian(property.price) %>
+          ₹ <%= number_with_delimiter(property.price) %>
         </p>
+        <% if user_signed_in? && (property.project.user == current_user || current_user.admin?) %>
+          <div class="flex gap-2 mt-3">
+            <%= link_to "Edit", @project ? edit_project_property_path(@project, property) : edit_property_path(property), class: "text-xs text-amber-700 hover:text-amber-600 font-medium transition duration-200" %>
+            <%= link_to "Delete", @project ? project_property_path(@project, property) : property, method: :delete,
+                data: { confirm: "Are you sure you want to delete this property?" },
+                class: "text-xs text-red-600 hover:text-red-800 font-medium transition duration-200" %>
+          </div>
+        <% end %>
       </div>
     <% end %>
   <% end %>
 </div>
 
-<%== pagy_nav(@pagy) if @pagy.pages > 1 %>
+<%== @pagy.series_nav if @pagy.pages > 1 %>

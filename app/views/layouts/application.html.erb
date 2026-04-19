@@ -14,7 +14,7 @@
   <%= render "layouts/header" %>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
-    <%= render "layouts/breadcrumb" %>
+    <%#= render "layouts/breadcrumb" %>
 
     <% if notice.present? %>
       <div class="mb-4 px-4 py-3 bg-green-50 border border-green-200 text-green-800 rounded-lg text-sm">
@@ -27,9 +27,7 @@
       </div>
     <% end %>
 
-    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
       <%= yield %>
-    </div>
   </main>
 
   <%= render "layouts/footer" %>
