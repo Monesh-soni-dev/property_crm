@@ -7,6 +7,6 @@ FactoryBot.define do
     total_units { 1 }
     start_date { "2026-04-12" }
     end_date { "2026-04-12" }
-    user { nil }
+    association :user
   end
 end

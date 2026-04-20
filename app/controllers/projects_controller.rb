@@ -10,6 +10,7 @@ class ProjectsController < ApplicationController
 
   def show
     @properties = @project.properties
+    byebug
     @total_properties = @properties.count
     @available_properties = @properties.where(status: :available).count
   end
@@ -17,6 +18,7 @@ class ProjectsController < ApplicationController
   def new
     if user_signed_in?
       @project = current_user.projects.build
+      @project.properties.build
     else
       redirect_to new_user_session_path, alert: 'You need to sign in to create a project.'
     end
@@ -24,6 +26,8 @@ class ProjectsController < ApplicationController
 
   def create
     @project = current_user.projects.build(project_params)
+    assign_nested_property_owners(@project)
+
     if @project.save
       redirect_to @project, notice: 'Project was successfully created.'
     else
@@ -36,7 +40,10 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    if @project.update(project_params)
+    @project.assign_attributes(project_params)
+    assign_nested_property_owners(@project)
+
+    if @project.save
       redirect_to @project, notice: 'Project was successfully updated.'
     else
       render :edit
@@ -55,6 +62,35 @@ class ProjectsController < ApplicationController
   end
 
   def project_params
-    params.require(:project).permit(:name, :description, :status, :start_date, :end_date, images: [], videos: [])
+    params.require(:project).permit(
+      :name,
+      :description,
+      :status,
+      :start_date,
+      :end_date,
+      images: [],
+      videos: [],
+      properties_attributes: [
+        :id,
+        :title,
+        :unit_number,
+        :floor,
+        :property_type,
+        :price,
+        :area,
+        :bedrooms,
+        :bathrooms,
+        :facing,
+        :status,
+        :description,
+        :_destroy
+      ]
+    )
+  end
+
+  def assign_nested_property_owners(project)
+    project.properties.each do |property|
+      property.user ||= current_user
+    end
   end
 end

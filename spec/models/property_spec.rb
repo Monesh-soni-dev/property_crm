@@ -1,5 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe Property, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  it "defaults status to available" do
+    property = build(:property, status: nil)
+
+    expect(property.status).to eq("available")
+  end
 end

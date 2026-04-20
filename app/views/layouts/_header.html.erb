@@ -1,13 +1,11 @@
 <header class="navbar bg-gradient-to-r from-blue-200 via-amber-200 to-blue-300 shadow-2xl border-b border-amber-300">
   <div class="container flex items-center justify-between px-4 py-4 mx-auto max-w-6xl">
     <!-- Logo -->
-    <div class="logo flex items-center gap-3">
-      <div class="w-12 h-12 rounded-xl bg-white shadow-xl flex items-center justify-center text-amber-600 font-bold text-lg transform hover:scale-105 transition duration-200">PP</div>
-      <div>
-        <%= link_to root_path, class: "text-slate-900 text-xl font-bold hover:text-slate-700 transition duration-200" do %>
-          PlotPlans
-        <% end %>
-      </div>
+    <div class="logo">
+      <%= link_to root_path, class: "flex items-center gap-3" do %>
+        <div class="w-12 h-12 rounded-xl bg-white shadow-xl flex items-center justify-center text-amber-600 font-bold text-lg transform hover:scale-105 transition duration-200">PP</div>
+        <div class="text-slate-900 text-xl font-bold hover:text-slate-700 transition duration-200">PlotPlans</div>
+      <% end %>
     </div>
 
     <!-- Navigation -->

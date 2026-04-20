@@ -29,6 +29,14 @@ class PropertyPolicy < ApplicationPolicy
     update?
   end
 
+  def new?
+    user.present?   # or true if you want everyone
+  end
+
+  def create?
+    new?
+  end
+
   def destroy?
     user.present? && (record.user == user || user.admin?)
   end

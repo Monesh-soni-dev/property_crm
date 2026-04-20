@@ -1,4 +1,4 @@
-<%= form_with(model: project, class: "space-y-6") do |form| %>
+<%= form_with(model: project, class: "space-y-6", data: { controller: "project-properties" }) do |form| %>
   <% if project.errors.any? %>
     <div class="bg-red-50 border border-red-200 rounded-lg p-4">
       <div class="flex">
@@ -96,6 +96,34 @@
         </div>
       </div>
     <% end %>
+  </div>
+
+  <div class="space-y-4">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Project Properties</h2>
+        <p class="text-sm text-gray-500">Add one or more properties while creating the project.</p>
+      </div>
+      <button
+        type="button"
+        class="px-4 py-2 border border-amber-700 text-amber-700 rounded-lg hover:bg-amber-50 font-medium transition duration-200"
+        data-action="project-properties#add"
+      >
+        Add Another Property
+      </button>
+    </div>
+
+    <template data-project-properties-target="template">
+      <%= form.fields_for :properties, Property.new(status: "available"), child_index: "NEW_RECORD" do |property_fields| %>
+        <%= render "property_fields", form: property_fields %>
+      <% end %>
+    </template>
+
+    <div class="space-y-4" data-project-properties-target="container">
+      <%= form.fields_for :properties do |property_fields| %>
+        <%= render "property_fields", form: property_fields %>
+      <% end %>
+    </div>
   </div>
 
   <!-- Submit Button -->

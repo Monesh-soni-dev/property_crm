@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory :property do
-    project { nil }
+    association :project
+    user { project.user }
     title { "MyString" }
     unit_number { "MyString" }
     floor { 1 }
@@ -10,7 +11,7 @@ FactoryBot.define do
     bedrooms { 1 }
     bathrooms { 1 }
     facing { "MyString" }
-    status { "MyString" }
+    status { "available" }
     description { "MyText" }
   end
 end

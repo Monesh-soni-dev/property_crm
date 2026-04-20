@@ -21,8 +21,11 @@
           </span>
 
           <% if user_signed_in? && (@property.user == current_user || current_user.admin?) %>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
               <%= link_to "Edit Property", @project ? edit_project_property_path(@project, @property) : edit_property_path(@property), class: "bg-amber-700 text-white px-4 py-2 rounded-lg hover:bg-amber-600 font-medium transition duration-200 shadow-md" %>
+              <% if @property.project.present? %>
+                <%= link_to "Add Another Unit", new_project_property_path(@property.project), class: "bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium transition duration-200 shadow-md" %>
+              <% end %>
               <%= link_to "Delete", @project ? project_property_path(@project, @property) : @property, method: :delete,
                   data: { confirm: "Are you sure you want to delete this property?" },
                   class: "bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-medium transition duration-200 shadow-md" %>
@@ -69,7 +72,7 @@
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Type:</span>
-              <span class="font-medium"><%= @property.property_type %></span>
+              <span class="font-medium"><%= @property.property_type&.titleize %></span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Facing:</span>

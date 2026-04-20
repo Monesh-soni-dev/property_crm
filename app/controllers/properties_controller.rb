@@ -5,11 +5,15 @@ class PropertiesController < ApplicationController
   before_action :set_property, only: [:show, :edit, :update, :destroy]
 
   def index
+    byebug
+    @properties = Property.includes(:project).all
     @q = policy_scope(Property)
     # Only filter by project if we're in a project context (nested route)
     @q = @q.where(project: @project) if @project
     @q = @q.ransack(params[:q])
+    byebug
     @pagy, @properties = pagy(@q.result.includes(:project), items: 12)
+    byebug
     authorize Property
   end
 
