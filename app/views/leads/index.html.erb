@@ -1,29 +1,123 @@
 <div class="flex items-center justify-between mb-6">
   <div>
-    <h1 class="text-2xl font-['Playfair_Display'] font-semibold">Lead pipeline</h1>
-    <p class="text-sm text-gray-400 mt-1"><%= @leads_by_stage.values.flatten.count %> active leads</p>
+    <h1 class="text-2xl font-['Playfair_Display'] font-semibold">Lead Management</h1>
+    <p class="text-sm text-gray-400 mt-1"><%= @leads.count %> leads</p>
   </div>
-  <%= link_to "New lead", new_lead_path,
-        class: "flex items-center gap-1.5 bg-[#1a2e4a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2a4a72] transition" %>
+  <%= link_to "New Lead", new_lead_path,
+        class: "flex items-center gap-1.5 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition" %>
 </div>
 
-<div class="grid grid-cols-5 gap-3" data-controller="sortable">
-  <% Lead.stages.each_key do |stage| %>
-    <div class="bg-stone-50 rounded-xl p-2.5">
-      <div class="flex items-center justify-between mb-2.5 px-1">
-        <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-          <%= stage.humanize %>
-        </span>
-        <span class="bg-gray-200 text-gray-600 text-[10px] rounded-full px-2 py-px font-medium">
-          <%= @leads_by_stage[stage]&.count || 0 %>
-        </span>
-      </div>
+<!-- Filters -->
+<div class="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+  <%= form_with url: leads_path, method: :get, local: true, class: "flex flex-wrap gap-4 items-end" do |f| %>
+    <div class="flex-1 min-w-48">
+      <%= f.label :search, "Search", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :search, value: params[:search], placeholder: "Name, phone, property...", class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+    
+    <div>
+      <%= f.label :status, "Status", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.select :status, options_for_select([["All Statuses", ""]] + Lead.stages.keys.map { |k| [k.humanize, k] }, params[:status]), {}, { class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" } %>
+    </div>
+    
+    <div>
+      <%= f.label :follow_up, "Follow Up", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.select :follow_up, options_for_select([["All", ""], ["Today", "today"], ["Upcoming", "upcoming"]], params[:follow_up]), {}, { class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" } %>
+    </div>
+    
+    <div>
+      <%= f.submit "Filter", class: "bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition" %>
+      <%= link_to "Reset", leads_path, class: "ml-2 text-gray-600 hover:text-gray-900 text-sm" %>
+    </div>
+  <% end %>
+</div>
 
-      <div id="stage_<%= stage %>" class="space-y-2 min-h-16">
-        <% @leads_by_stage[stage]&.each do |lead| %>
-          <%= render "leads/card", lead: lead %>
+<!-- Leads Table -->
+<div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th class="text-left py-3 px-4 font-medium text-sm text-gray-900">Customer</th>
+          <th class="text-left py-3 px-4 font-medium text-sm text-gray-900">Phone</th>
+          <th class="text-left py-3 px-4 font-medium text-sm text-gray-900">Property</th>
+          <th class="text-left py-3 px-4 font-medium text-sm text-gray-900">Budget</th>
+          <th class="text-left py-3 px-4 font-medium text-sm text-gray-900">Status</th>
+          <th class="text-left py-3 px-4 font-medium text-sm text-gray-900">Follow Up</th>
+          <th class="text-left py-3 px-4 font-medium text-sm text-gray-900">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @leads.each do |lead| %>
+          <tr class="hover:bg-gray-50 <%= 'bg-yellow-50' if lead.follow_up_date == Date.current %>">
+            <td class="py-3 px-4">
+              <div>
+                <p class="font-medium text-gray-900"><%= lead.name %></p>
+                <p class="text-sm text-gray-500"><%= lead.email %></p>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-sm text-gray-900"><%= lead.phone %></td>
+            <td class="py-3 px-4">
+              <div>
+                <p class="text-sm text-gray-900"><%= lead.property_name || (lead.property&.name) || 'N/A' %></p>
+                <p class="text-xs text-gray-500"><%= lead.property_location || (lead.property&.location) %></p>
+              </div>
+            </td>
+            <td class="py-3 px-4">
+              <% if lead.budget.present? && lead.budget.to_f > 0 %>
+                <span class="text-sm text-green-600 font-medium">₹<%= number_to_currency(lead.budget, unit: '', precision: 0, delimiter: ',') %></span>
+              <% else %>
+                <span class="text-sm text-gray-400">N/A</span>
+              <% end %>
+            </td>
+            <td class="py-3 px-4">
+              <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+                <%= case lead.stage
+                    when 'new_lead'
+                      'bg-gray-100 text-gray-800'
+                    when 'contacted'
+                      'bg-blue-100 text-blue-800'
+                    when 'interested'
+                      'bg-green-100 text-green-800'
+                    when 'visit_scheduled'
+                      'bg-yellow-100 text-yellow-800'
+                    when 'negotiation'
+                      'bg-orange-100 text-orange-800'
+                    when 'closed'
+                      'bg-emerald-100 text-emerald-800'
+                    when 'rejected'
+                      'bg-red-100 text-red-800'
+                    else
+                      'bg-gray-100 text-gray-800'
+                    end %>">
+                <%= lead.stage.humanize %>
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              <% if lead.follow_up_date %>
+                <span class="text-sm <%= 'text-red-600 font-medium' if lead.follow_up_date == Date.current %>">
+                  <%= lead.follow_up_date.strftime("%b %d, %Y") %>
+                </span>
+              <% else %>
+                <span class="text-sm text-gray-400">Not set</span>
+              <% end %>
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex gap-2">
+                <%= link_to "View", lead_path(lead), class: "text-blue-600 hover:text-blue-900 text-sm" %>
+                <%= link_to "Edit", edit_lead_path(lead), class: "text-gray-600 hover:text-gray-900 text-sm" %>
+              </div>
+            </td>
+          </tr>
         <% end %>
-      </div>
+      </tbody>
+    </table>
+  </div>
+  
+  <% if @leads.empty? %>
+    <div class="text-center py-12">
+      <p class="text-gray-500">No leads found.</p>
+      <%= link_to "Create your first lead", new_lead_path, class: "text-blue-600 hover:text-blue-900" %>
     </div>
   <% end %>
 </div>

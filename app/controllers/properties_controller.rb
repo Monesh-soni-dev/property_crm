@@ -5,21 +5,21 @@ class PropertiesController < ApplicationController
   before_action :set_property, only: [:show, :edit, :update, :destroy]
 
   def index
-    byebug
-    @properties = Property.includes(:project).all
-    @q = policy_scope(Property)
-    # Only filter by project if we're in a project context (nested route)
-    @q = @q.where(project: @project) if @project
-    @q = @q.ransack(params[:q])
-    byebug
+    if user_signed_in?
+      @properties = policy_scope(Property).includes(:project)
+      authorize Property
+    else
+      @properties = Property.where(status: :available).includes(:project)
+    end
+    @properties = @properties.where(project: @project) if @project
+    @q = @properties.ransack(params[:q])
     @pagy, @properties = pagy(@q.result.includes(:project), items: 12)
-    byebug
-    authorize Property
   end
 
   def new
     if user_signed_in?
-      @property = @project ? @project.properties.build : Property.new
+      @property = Property.new
+      @property.project_id = params[:project_id] if params[:project_id].present?
       authorize @property
     else
       redirect_to new_user_session_path, alert: 'You need to sign in to create a property.'
@@ -27,16 +27,12 @@ class PropertiesController < ApplicationController
   end
 
   def create
-    if @project
-      @property = @project.properties.build(property_params)
-    else
-      @property = Property.new(property_params)
-    end
+    @property = Property.new(property_params)
     @property.user = current_user
     authorize @property
     
     if @property.save
-      redirect_to @project ? project_property_path(@project, @property) : @property, notice: "Property added successfully."
+      redirect_to @property, notice: "Property added successfully."
     else
       render :new, status: :unprocessable_entity
     end
@@ -73,14 +69,17 @@ class PropertiesController < ApplicationController
 
   def set_property
     @property = Property.find(params[:id])
-    authorize @property
+    # Only authorize for signed-in users, guests can view but not edit
+    authorize @property if user_signed_in?
   end
 
   def property_params
     params.require(:property).permit(
-      :title, :unit_number, :floor, :property_type,
+      :project_id, :title, :unit_number, :floor, :property_type,
       :price, :area, :bedrooms, :bathrooms,
-      :facing, :status, :description, images: [], videos: []
+      :facing, :status, :description, 
+      :contact_phone, :contact_email, :website, :contact_person, :additional_contact,
+      images: [], videos: []
     )
   end
 end

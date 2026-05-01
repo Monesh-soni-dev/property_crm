@@ -11,6 +11,10 @@ Rails.application.routes.draw do
   get '/500', to: 'errors#internal_server_error', as: :internal_server_error
 
   resources :properties
+  resources :leads do
+    member { patch :update_stage }
+    resources :activities, only: [:create, :destroy]
+  end  
   resources :projects do
     resources :properties, except: [:index]
 
@@ -34,4 +38,12 @@ Rails.application.routes.draw do
     resources :users
     get :reports, to: 'reports#index'
   end
+
+  # Static pages
+  get '/about', to: 'pages#about', as: :about
+  get '/privacy', to: 'pages#privacy', as: :privacy
+  get '/terms', to: 'pages#terms', as: :terms
+  get '/help', to: 'pages#help', as: :help
+  get '/contact', to: 'pages#contact', as: :contact 
+  get '/documentation', to: 'pages#documentation', as: :documentation
 end

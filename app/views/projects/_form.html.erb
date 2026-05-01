@@ -98,37 +98,9 @@
     <% end %>
   </div>
 
-  <div class="space-y-4">
-    <div class="flex items-center justify-between gap-4">
-      <div>
-        <h2 class="text-lg font-semibold text-gray-900">Project Properties</h2>
-        <p class="text-sm text-gray-500">Add one or more properties while creating the project.</p>
-      </div>
-      <button
-        type="button"
-        class="px-4 py-2 border border-amber-700 text-amber-700 rounded-lg hover:bg-amber-50 font-medium transition duration-200"
-        data-action="project-properties#add"
-      >
-        Add Another Property
-      </button>
-    </div>
-
-    <template data-project-properties-target="template">
-      <%= form.fields_for :properties, Property.new(status: "available"), child_index: "NEW_RECORD" do |property_fields| %>
-        <%= render "property_fields", form: property_fields %>
-      <% end %>
-    </template>
-
-    <div class="space-y-4" data-project-properties-target="container">
-      <%= form.fields_for :properties do |property_fields| %>
-        <%= render "property_fields", form: property_fields %>
-      <% end %>
-    </div>
-  </div>
-
   <!-- Submit Button -->
   <div class="flex justify-end space-x-4">
-    <%= link_to "Cancel", projects_path, class: "px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition duration-200" %>
-    <%= form.submit class: "px-6 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-600 font-medium transition duration-200 shadow-md focus:ring-2 focus:ring-amber-500 focus:ring-offset-2" %>
+    <%= link_to "Cancel", projects_path, class: "px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 font-medium transition-all" %>
+    <%= form.submit class: "px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg" %>
   </div>
 <% end %>

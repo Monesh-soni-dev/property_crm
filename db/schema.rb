@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_19_080455) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_26_175926) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -83,8 +83,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_19_080455) do
   end
 
   create_table "leads", force: :cascade do |t|
-    t.bigint "project_id", null: false
-    t.bigint "property_id", null: false
+    t.bigint "project_id"
+    t.bigint "property_id"
     t.bigint "user_id", null: false
     t.string "name"
     t.string "email"
@@ -96,6 +96,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_19_080455) do
     t.datetime "follow_up_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "property_name"
+    t.string "property_location"
+    t.string "property_type"
+    t.date "follow_up_date"
     t.index ["project_id"], name: "index_leads_on_project_id"
     t.index ["property_id"], name: "index_leads_on_property_id"
     t.index ["user_id"], name: "index_leads_on_user_id"
@@ -159,6 +163,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_19_080455) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.string "contact_phone"
+    t.string "contact_email"
+    t.string "website"
+    t.string "contact_person"
+    t.text "additional_contact"
     t.index ["project_id"], name: "index_properties_on_project_id"
     t.index ["user_id"], name: "index_properties_on_user_id"
   end

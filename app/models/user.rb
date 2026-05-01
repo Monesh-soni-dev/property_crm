@@ -5,10 +5,13 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
   enum role: {builder:  'builder',admin:    'admin',agent:    'agent',engineer: 'engineer'}
   has_many :projects, dependent: :destroy
+  has_many :leads, dependent: :destroy
 
   # Validations
   validates :email, presence: true, uniqueness: true
-  validates :role, presence: true
+  validates :first_name, presence: true, length: { minimum: 2 }
+  validates :last_name, presence: true, length: { minimum: 2 }
+  validates :role, presence: { message: "must be selected" }, inclusion: { in: roles.keys }
 
   # Methods
   def full_name

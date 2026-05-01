@@ -1,24 +1,24 @@
 class ProjectsController < ApplicationController
-  before_action :authenticate_user!, except: [:index, :show]
+  before_action :authenticate_user!
   before_action :set_project, only: [:show, :edit, :update, :destroy]
 
   def index
     @projects = Project.all.includes(:user, :properties)
     @total_projects = @projects.count
     @active_projects = @projects.where(status: 'active').count
+    authorize Project
   end
 
   def show
     @properties = @project.properties
-    byebug
     @total_properties = @properties.count
     @available_properties = @properties.where(status: :available).count
+    authorize @project
   end
 
   def new
     if user_signed_in?
       @project = current_user.projects.build
-      @project.properties.build
     else
       redirect_to new_user_session_path, alert: 'You need to sign in to create a project.'
     end
@@ -26,7 +26,6 @@ class ProjectsController < ApplicationController
 
   def create
     @project = current_user.projects.build(project_params)
-    assign_nested_property_owners(@project)
 
     if @project.save
       redirect_to @project, notice: 'Project was successfully created.'
@@ -40,10 +39,7 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    @project.assign_attributes(project_params)
-    assign_nested_property_owners(@project)
-
-    if @project.save
+    if @project.update(project_params)
       redirect_to @project, notice: 'Project was successfully updated.'
     else
       render :edit
@@ -69,28 +65,7 @@ class ProjectsController < ApplicationController
       :start_date,
       :end_date,
       images: [],
-      videos: [],
-      properties_attributes: [
-        :id,
-        :title,
-        :unit_number,
-        :floor,
-        :property_type,
-        :price,
-        :area,
-        :bedrooms,
-        :bathrooms,
-        :facing,
-        :status,
-        :description,
-        :_destroy
-      ]
+      videos: []
     )
-  end
-
-  def assign_nested_property_owners(project)
-    project.properties.each do |property|
-      property.user ||= current_user
-    end
   end
 end

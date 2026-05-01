@@ -1,103 +1,356 @@
-<div class="flex items-start justify-between mb-6">
-  <div>
-    <h1 class="text-2xl font-['Playfair_Display'] font-semibold">
-      All Properties
-    </h1>
-    <p class="text-sm text-gray-400 mt-1">
-      <%= @total_properties %> total properties · <%= @available_properties %> available · <%= @sold_properties %> sold
-    </p>
+<!-- Hero Section -->
+<div class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
+  <div class="relative z-10">
+    <div class="flex items-start justify-between">
+      <div>
+        <h1 class="text-4xl font-['Playfair_Display'] font-bold mb-2">
+          <% if @is_builder_dashboard %>
+            My Property Dashboard
+          <% elsif user_signed_in? && current_user.admin? %>
+            Admin Dashboard
+          <% else %>
+            Property Showcase
+          <% end %>
+        </h1>
+        <p class="text-xl text-blue-100 mb-4">
+          <% if @is_builder_dashboard %>
+            Manage your real estate projects and properties
+          <% elsif user_signed_in? && current_user.admin? %>
+            Complete property management system
+          <% else %>
+            Discover amazing properties for your dream home
+          <% end %>
+        </p>
+        <div class="flex items-center gap-6 text-sm text-slate-300">
+            <span class="flex items-center gap-1">
+              <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+              <%= @total_properties %> Total Properties
+            </span>
+            <span class="flex items-center gap-1">
+              <div class="w-2 h-2 rounded-full bg-green-400"></div>
+              <%= @available_properties %> Available
+            </span>
+            <span class="flex items-center gap-1">
+              <div class="w-2 h-2 rounded-full bg-red-400"></div>
+              <%= @sold_properties %> Sold
+            </span>
+        </div>
+      </div>
+      <% if user_signed_in? && (current_user.admin? || current_user.builder?) %>
+        <div class="flex gap-3">
+          <% if current_user.builder? || current_user.admin? %>
+            <%= link_to projects_path, class: "flex items-center gap-2 bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition transform hover:scale-105 shadow-lg" do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              <% if @is_builder_dashboard %>
+                Manage My Projects
+              <% else %>
+                Manage Projects
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      <% elsif user_signed_in? %>
+        <div class="flex gap-3">
+          <%= link_to properties_path, class: "flex items-center gap-2 bg-white text-slate-900 px-6 py-3 rounded-xl font-semibold hover:bg-slate-100 transition transform hover:scale-105 shadow-lg" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+            </svg>
+            Browse Properties
+          <% end %>
+          <%= link_to leads_path, class: "flex items-center gap-2 bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition transform hover:scale-105 shadow-lg" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            Manage Leads
+          <% end %>
+        </div>
+      <% elsif @builders.any? %>
+        <div class="flex gap-3">
+          <%= link_to contact_path, class: "flex items-center gap-2 bg-white text-slate-900 px-6 py-3 rounded-xl font-semibold hover:bg-slate-100 transition transform hover:scale-105 shadow-lg" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+            Contact Builder
+          <% end %>
+          <% unless user_signed_in? %>
+            <%= link_to new_user_session_path, class: "flex items-center gap-2 bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition transform hover:scale-105 shadow-lg" do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+              Sign In
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
   </div>
-  <% if user_signed_in? %>
-    <div class="flex gap-2">
-      <%= link_to properties_path, class: "flex items-center gap-1.5 bg-[#1a2e4a] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#2a4a72] transition" do %>
-        View All Properties
+</div>
+
+<!-- Enhanced Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+  <!-- Total Properties Card -->
+  <div class="group bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Total Properties</p>
+        <p class="text-3xl font-bold text-gray-900"><%= @total_properties %></p>
+        <p class="text-sm text-gray-500 mt-1">Active Portfolio</p>
+      </div>
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Properties Card -->
+  <div class="group bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Available</p>
+        <p class="text-3xl font-bold text-emerald-600"><%= @available_properties %></p>
+        <p class="text-sm text-gray-500 mt-1">Ready for Sale</p>
+      </div>
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sold Properties Card -->
+  <div class="group bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Sold</p>
+        <p class="text-3xl font-bold text-rose-600"><%= @sold_properties %></p>
+        <p class="text-sm text-gray-500 mt-1">Completed Sales</p>
+      </div>
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center shadow-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sales Rate Card -->
+  <div class="group bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Sales Rate</p>
+        <p class="text-3xl font-bold text-amber-600"><%= @total_properties > 0 ? (@sold_properties.to_f / @total_properties * 100).round(1) : 0 %>%</p>
+        <p class="text-sm text-gray-500 mt-1">Success Rate</p>
+      </div>
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Featured Properties Section -->
+<div class="mb-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h2 class="text-2xl font-['Playfair_Display'] font-bold text-gray-900">
+        <% if @is_builder_dashboard %>
+          My Properties
+        <% else %>
+          Featured Properties
+        <% end %>
+      </h2>
+      <p class="text-gray-500 mt-1">
+        <% if @is_builder_dashboard %>
+          Properties in your portfolio
+        <% else %>
+          Discover our latest and best properties
+        <% end %>
+      </p>
+    </div>
+    <%= link_to properties_path, class: "text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 group" do %>
+      View All Properties
+      <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    <% end %>
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <% @properties.limit(6).each do |property| %>
+      <%= link_to project_property_path(property.project, property), class: "group block" do %>
+        <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+          <div class="h-64 bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
+            <% if property.images.attached? %>
+              <%= image_tag property.images.first, class: "w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" %>
+            <% else %>
+              <div class="flex items-center justify-center h-full">
+                <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+            <% end %>
+            
+            <!-- Status Badge -->
+            <div class="absolute top-4 right-4">
+              <span class="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md
+                <%= property.available? ? 'bg-emerald-500/90 text-white' :
+                   property.sold? ? 'bg-rose-500/90 text-white' :
+                   property.blocked? ? 'bg-amber-500/90 text-white' :
+                   'bg-gray-500/90 text-white' %>">
+                <%= property.status&.humanize || 'Unknown' %>
+              </span>
+            </div>
+            
+            <!-- Property Type Badge -->
+            <div class="absolute top-4 left-4">
+              <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-gray-800 text-xs font-semibold rounded-full">
+                <%= property.property_type&.titleize || 'Apartment' %>
+              </span>
+            </div>
+          </div>
+          
+          <div class="p-6">
+            <div class="flex items-start justify-between mb-3">
+              <h3 class="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors"><%= property.title %></h3>
+              <div class="text-right">
+                <% if property.price.present? && property.price > 0 %>
+                  <p class="text-2xl font-bold text-blue-600">₹<%= number_with_delimiter(property.price / 100000) %>L</p>
+                <% else %>
+                  <p class="text-2xl font-bold text-gray-400">Price not set</p>
+                <% end %>
+                <p class="text-xs text-gray-500">Total Price</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center text-gray-600 mb-4">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              <span class="text-sm"><%= property.project.name %></span>
+              <span class="mx-2 text-gray-300">•</span>
+              <span class="text-sm">Floor <%= property.floor %></span>
+            </div>
+            
+            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div class="flex items-center gap-4 text-sm text-gray-600">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path>
+                  </svg>
+                  <%= property.area %> sq ft
+                </span>
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  </svg>
+                  <%= property.bedrooms %> BHK
+                </span>
+              </div>
+              
+              <div class="flex items-center text-blue-600 font-medium text-sm group">
+                View Details
+                <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if @properties.empty? %>
+    <div class="text-center py-20">
+      <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+        <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+      </div>
+      <h3 class="text-2xl font-['Playfair_Display'] font-bold text-gray-900 mb-3">
+        <% if @is_builder_dashboard %>
+          No Properties in Your Portfolio
+        <% else %>
+          No Properties Available
+        <% end %>
+      </h3>
+      <p class="text-gray-500 text-lg max-w-md mx-auto mb-8">
+        <% if @is_builder_dashboard %>
+          Start building your real estate portfolio by creating your first project and adding properties.
+        <% else %>
+          Get started by creating your first project and adding properties to showcase your real estate portfolio.
+        <% end %>
+      </p>
+      <% if user_signed_in? && (current_user.admin? || current_user.builder?) %>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <%= link_to projects_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all transform hover:scale-105 shadow-lg" do %>
+            Create First Project
+          <% end %>
+          <%= link_to properties_path, class: "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 px-8 py-4 rounded-2xl font-semibold transition-all" do %>
+            Browse Properties
+          <% end %>
+        </div>
+      <% else %>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <% if @builders.any? %>
+            <%= link_to contact_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all transform hover:scale-105 shadow-lg" do %>
+              Contact Builder
+            <% end %>
+          <% end %>
+          <%= link_to new_user_session_path, class: "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 px-8 py-4 rounded-2xl font-semibold transition-all" do %>
+            Sign In
+          <% end %>
+          <%= link_to new_user_registration_path, class: "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 px-8 py-4 rounded-2xl font-semibold transition-all" do %>
+            Create Account
+          <% end %>
+        </div>
       <% end %>
     </div>
   <% end %>
 </div>
 
-<!-- Property Stats -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-        🏠
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-600">Total Properties</p>
-        <p class="text-2xl font-bold text-gray-900"><%= @total_properties %></p>
-      </div>
-    </div>
-  </div>
-
-  <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-        ✅
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-600">Available</p>
-        <p class="text-2xl font-bold text-gray-900"><%= @available_properties %></p>
-      </div>
-    </div>
-  </div>
-
-  <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-        ❌
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-600">Sold</p>
-        <p class="text-2xl font-bold text-gray-900"><%= @sold_properties %></p>
-      </div>
+<!-- Contact Builder Section -->
+<% if @builders.any? && !user_signed_in? %>
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-8 mb-8">
+  <div class="text-center">
+    <h3 class="text-2xl font-['Playfair_Display'] font-bold text-gray-900 mb-4">Interested in Our Properties?</h3>
+    <p class="text-gray-600 mb-6 max-w-2xl mx-auto">Get in touch with our experienced builders to discuss your dream home. We're here to help you find the perfect property.</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <%= link_to contact_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all transform hover:scale-105 shadow-lg" do %>
+        Contact Builder
+      <% end %>
+      <% if @builders.first %>
+        <a href="mailto:<%= @builders.first.email %>" class="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-4 rounded-2xl font-semibold transition-all">
+          Email: <%= @builders.first.email %>
+        </a>
+      <% end %>
     </div>
   </div>
 </div>
+<% end %>
 
-<!-- Properties Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-  <% @properties.each do |property| %>
-    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-blue-400 transition group">
-      <div class="h-48 bg-stone-100 relative flex items-center justify-center">
-        <% if property.images.attached? %>
-          <%= image_tag property.images.first, class: "w-full h-full object-cover" %>
-        <% else %>
-          <div class="text-6xl text-gray-300">🏠</div>
-        <% end %>
-        <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold
-          <%= property.available? ? 'bg-green-50 text-green-800 border border-green-200' :
-             property.sold? ? 'bg-red-50 text-red-800 border border-red-200' :
-             property.blocked? ? 'bg-yellow-50 text-yellow-800 border border-yellow-200' :
-             'bg-gray-50 text-gray-800 border border-gray-200' %>">
-          <%= property.status&.humanize || 'Unknown' %>
-        </span>
-      </div>
-      <div class="p-4">
-        <h3 class="font-semibold text-gray-900 mb-1"><%= property.title %></h3>
-        <p class="text-sm text-gray-500 mb-2"><%= property.project.name %> · Floor <%= property.floor %></p>
-        <div class="flex items-center justify-between text-sm">
-          <span class="text-gray-600"><%= property.property_type %></span>
-          <span class="font-semibold text-gray-900"><%= number_to_currency(property.price, unit: '₹', format: '%u%n') %></span>
-        </div>
-        <div class="flex items-center justify-between text-xs text-gray-500 mt-2">
-          <span><%= property.area %> sq ft</span>
-          <span><%= property.bedrooms %> BHK</span>
-        </div>
-      </div>
+<!-- Leads Management for Signed-in Users -->
+<% if user_signed_in? && !current_user.admin? && !current_user.builder? %>
+<div class="bg-white rounded-2xl p-8 border border-gray-200 mb-8">
+  <div class="text-center">
+    <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+      <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+      </svg>
     </div>
-  <% end %>
-</div>
-
-<% if @properties.empty? %>
-  <div class="text-center py-12">
-    <div class="text-6xl mb-4">🏠</div>
-    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Properties Found</h3>
-    <p class="text-gray-500">There are no properties available at the moment.</p>
-    <% if user_signed_in? %>
-      <div class="mt-4">
-        <%= link_to "Add Your First Property", projects_path, class: "bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition" %>
-      </div>
+    <h3 class="text-2xl font-['Playfair_Display'] font-bold text-gray-900 mb-3">Leads Management</h3>
+    <p class="text-gray-500 text-lg max-w-md mx-auto mb-8">Welcome to your leads dashboard. Manage customer inquiries and track your sales progress.</p>
+    <%= link_to leads_path, class: "bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all transform hover:scale-105 shadow-lg" do %>
+      Manage Leads
     <% end %>
   </div>
+</div>
 <% end %>

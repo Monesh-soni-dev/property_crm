@@ -1,0 +1,383 @@
+<% content_for :title, @page_title %>
+<div class="min-h-screen bg-gray-50">
+  <!-- Header Section -->
+  <section class="bg-gradient-to-r from-slate-800 to-gray-900 text-white py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-6">Documentation</h1>
+        <p class="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed mb-8">
+          Complete guides, API references, and tutorials to help you get the most out of PropertyCRM.
+        </p>
+        
+        <!-- Version Info -->
+        <div class="inline-flex items-center bg-slate-700 rounded-full px-6 py-3 text-sm">
+          <span class="bg-green-500 w-2 h-2 rounded-full mr-3"></span>
+          <span class="text-slate-200">Documentation for PropertyCRM v2.1.0</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-4 py-12">
+    <!-- Quick Navigation -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">Documentation Categories</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow">
+          <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">User Guides</h3>
+          <p class="text-gray-600 text-center mb-6">Step-by-step instructions for all PropertyCRM features</p>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li>• Getting started guide</li>
+            <li>• Property management basics</li>
+            <li>• Lead tracking workflows</li>
+            <li>• Team collaboration features</li>
+            <li>• Reporting and analytics</li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow">
+          <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">API Reference</h3>
+          <p class="text-gray-600 text-center mb-6">Complete technical documentation for developers</p>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li>• REST API endpoints</li>
+            <li>• Authentication methods</li>
+            <li>• Data models & schemas</li>
+            <li>• Webhook integrations</li>
+            <li>• Code examples & SDKs</li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow">
+          <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">Tutorials</h3>
+          <p class="text-gray-600 text-center mb-6">Hands-on tutorials for common use cases</p>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li>• Setting up your first project</li>
+            <li>• Importing existing data</li>
+            <li>• Configuring automation</li>
+            <li>• Custom reporting setup</li>
+            <li>• Integration examples</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Documentation -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8">Featured Documentation</h2>
+      <div class="grid lg:grid-cols-2 gap-8">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6">
+            <h3 class="text-xl font-bold mb-2">Quick Start Guide</h3>
+            <p class="text-blue-100">Get up and running with PropertyCRM in under 15 minutes</p>
+          </div>
+          
+          <div class="p-6">
+            <div class="space-y-4">
+              <div class="flex items-start">
+                <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-4 mt-0.5">
+                  <span class="text-blue-600 font-bold text-sm">1</span>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-gray-900">Account Setup</h4>
+                  <p class="text-gray-600 text-sm">Create your account and configure basic settings</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-4 mt-0.5">
+                  <span class="text-blue-600 font-bold text-sm">2</span>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-gray-900">Add Your First Property</h4>
+                  <p class="text-gray-600 text-sm">Learn the basics of property management in PropertyCRM</p>
+                </div>
+              </div>
+              
+              <div class="flex items-start">
+                <div class="bg-blue-100 rounded-full w-8 h-8 flex items-center justify-center mr-4 mt-0.5">
+                  <span class="text-blue-600 font-bold text-sm">3</span>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-gray-900">Invite Your Team</h4>
+                  <p class="text-gray-600 text-sm">Set up user permissions and collaborate effectively</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <button class="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium">
+                Read Full Guide
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6">
+            <h3 class="text-xl font-bold mb-2">API Integration Guide</h3>
+            <p class="text-green-100">Connect PropertyCRM with your existing tools and workflows</p>
+          </div>
+          
+          <div class="p-6">
+            <div class="bg-gray-900 rounded-lg p-4 mb-4 text-sm">
+              <div class="text-green-400 mb-2">// Example: Create a new property</div>
+              <div class="text-gray-300">
+                <span class="text-blue-300">POST</span> /api/v1/properties<br>
+                <span class="text-purple-300">{</span><br>
+                &nbsp;&nbsp;<span class="text-yellow-300">"name"</span>: <span class="text-green-300">"Downtown Condo"</span>,<br>
+                &nbsp;&nbsp;<span class="text-yellow-300">"address"</span>: <span class="text-green-300">"123 Main St"</span>,<br>
+                &nbsp;&nbsp;<span class="text-yellow-300">"type"</span>: <span class="text-green-300">"residential"</span><br>
+                <span class="text-purple-300">}</span>
+              </div>
+            </div>
+            
+            <div class="space-y-3 text-sm">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                RESTful API with JSON responses
+              </div>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                OAuth 2.0 and API key authentication
+              </div>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                Webhooks for real-time updates
+              </div>
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <button class="inline-flex items-center text-green-600 hover:text-green-700 font-medium">
+                View API Docs
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documentation Sections -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8">Complete Documentation</h2>
+      
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- User Documentation Column -->
+        <div class="space-y-6">
+          <h3 class="text-lg font-bold text-gray-900 border-b-2 border-blue-200 pb-2">User Documentation</h3>
+          
+          <div class="bg-white rounded-lg shadow border border-gray-100">
+            <div class="p-6 space-y-4">
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Getting Started</h4>
+                <p class="text-gray-600 text-sm mb-2">Basic setup and account configuration</p>
+                <span class="text-xs text-blue-600 font-medium">15 min read</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Property Management</h4>
+                <p class="text-gray-600 text-sm mb-2">Add, edit, and organize property information</p>
+                <span class="text-xs text-green-600 font-medium">20 min read</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Lead Tracking</h4>
+                <p class="text-gray-600 text-sm mb-2">Capture and manage potential clients</p>
+                <span class="text-xs text-purple-600 font-medium">12 min read</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Project Management</h4>
+                <p class="text-gray-600 text-sm mb-2">Track construction and development projects</p>
+                <span class="text-xs text-orange-600 font-medium">18 min read</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Team Collaboration</h4>
+                <p class="text-gray-600 text-sm mb-2">User roles, permissions, and sharing</p>
+                <span class="text-xs text-red-600 font-medium">10 min read</span>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <!-- Developer Documentation Column -->
+        <div class="space-y-6">
+          <h3 class="text-lg font-bold text-gray-900 border-b-2 border-green-200 pb-2">Developer Documentation</h3>
+          
+          <div class="bg-white rounded-lg shadow border border-gray-100">
+            <div class="p-6 space-y-4">
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">API Overview</h4>
+                <p class="text-gray-600 text-sm mb-2">Authentication, rate limits, and best practices</p>
+                <span class="text-xs text-blue-600 font-medium">Tech Guide</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Properties API</h4>
+                <p class="text-gray-600 text-sm mb-2">CRUD operations for property data</p>
+                <span class="text-xs text-green-600 font-medium">Reference</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Leads API</h4>
+                <p class="text-gray-600 text-sm mb-2">Manage leads and prospect information</p>
+                <span class="text-xs text-purple-600 font-medium">Reference</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Webhooks</h4>
+                <p class="text-gray-600 text-sm mb-2">Real-time event notifications</p>
+                <span class="text-xs text-orange-600 font-medium">Integration</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">SDKs & Libraries</h4>
+                <p class="text-gray-600 text-sm mb-2">Official client libraries and tools</p>
+                <span class="text-xs text-red-600 font-medium">Downloads</span>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tutorials Column -->
+        <div class="space-y-6">
+          <h3 class="text-lg font-bold text-gray-900 border-b-2 border-purple-200 pb-2">Tutorials & Examples</h3>
+          
+          <div class="bg-white rounded-lg shadow border border-gray-100">
+            <div class="p-6 space-y-4">
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Build a Property Dashboard</h4>
+                <p class="text-gray-600 text-sm mb-2">Create a custom dashboard with our API</p>
+                <span class="text-xs text-blue-600 font-medium">Tutorial</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Automated Lead Capture</h4>
+                <p class="text-gray-600 text-sm mb-2">Set up automatic lead imports from forms</p>
+                <span class="text-xs text-green-600 font-medium">Tutorial</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Custom Reports</h4>
+                <p class="text-gray-600 text-sm mb-2">Generate tailored analytics and insights</p>
+                <span class="text-xs text-purple-600 font-medium">Tutorial</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Third-party Integrations</h4>
+                <p class="text-gray-600 text-sm mb-2">Connect with CRM and accounting tools</p>
+                <span class="text-xs text-orange-600 font-medium">Tutorial</span>
+              </article>
+              
+              <article class="pb-4 border-b border-gray-100 last:border-b-0">
+                <h4 class="font-semibold text-gray-900 mb-1">Data Migration Guide</h4>
+                <p class="text-gray-600 text-sm mb-2">Import from legacy property systems</p>
+                <span class="text-xs text-red-600 font-medium">Tutorial</span>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Additional Resources -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-gray-900 mb-8">Additional Resources</h2>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg shadow border border-gray-100 p-6 text-center hover:shadow-lg transition-shadow">
+          <div class="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">Video Tutorials</h3>
+          <p class="text-gray-600 text-sm">Watch step-by-step video guides</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow border border-gray-100 p-6 text-center hover:shadow-lg transition-shadow">
+          <div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">Community Forum</h3>
+          <p class="text-gray-600 text-sm">Connect with other users</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow border border-gray-100 p-6 text-center hover:shadow-lg transition-shadow">
+          <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">Release Notes</h3>
+          <p class="text-gray-600 text-sm">Latest features and updates</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow border border-gray-100 p-6 text-center hover:shadow-lg transition-shadow">
+          <div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">Best Practices</h3>
+          <p class="text-gray-600 text-sm">Optimize your workflow</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Get Started Section -->
+    <section class="bg-gradient-to-r from-slate-800 to-gray-900 rounded-2xl text-white p-12 text-center">
+      <h2 class="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+      <p class="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+        Explore our comprehensive documentation and start building with PropertyCRM today.
+      </p>
+      
+      <div class="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <%= link_to help_path, class: "bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors" do %>
+          Browse Help Center
+        <% end %>
+        
+        <button class="bg-slate-700 text-white px-8 py-4 rounded-lg font-semibold hover:bg-slate-600 transition-colors">
+          View API Reference
+        </button>
+        
+        <button class="border-2 border-slate-400 text-slate-300 px-8 py-4 rounded-lg font-semibold hover:bg-slate-800 transition-colors">
+          Download SDK
+        </button>
+      </div>
+      
+      <div class="mt-8 text-slate-400 text-sm">
+        <p>📚 Updated weekly • 🔍 Searchable content • 💬 Community support</p>
+      </div>
+    </section>
+  </div>
+</div>

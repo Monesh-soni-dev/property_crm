@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
   include Pagy::Method
   before_action :configure_permitted_parameters, if: :devise_controller?
-  include Pundit
+  include Pundit::Authorization
   layout :determine_layout
 
   protected

@@ -8,6 +8,8 @@ class Project < ApplicationRecord
   has_many_attached :images
   has_many_attached :videos
 
-  accepts_nested_attributes_for :properties, allow_destroy: true,
-    reject_if: proc { |attributes| attributes.except("_destroy", "id").values.all?(&:blank?) }
+  # Validations
+  validates :name, presence: true, length: { minimum: 2 }
+  validates :status, presence: true
+  validates :description, presence: true
 end

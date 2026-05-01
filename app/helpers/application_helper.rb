@@ -18,4 +18,35 @@ module ApplicationHelper
       end.join.html_safe
     end
   end
+  
+  # Lead dashboard helpers
+  def lead_status_badge(status)
+    classes = case status.to_s
+              when 'new_lead'
+                'bg-gray-100 text-gray-800'
+              when 'contacted'
+                'bg-blue-100 text-blue-800'
+              when 'interested'
+                'bg-green-100 text-green-800'
+              when 'visit_scheduled'
+                'bg-yellow-100 text-yellow-800'
+              when 'negotiation'
+                'bg-orange-100 text-orange-800'
+              when 'closed'
+                'bg-emerald-100 text-emerald-800'
+              when 'rejected'
+                'bg-red-100 text-red-800'
+              else
+                'bg-gray-100 text-gray-800'
+              end
+              
+    content_tag :span, status.to_s.humanize, 
+                class: "inline-flex px-2 py-1 text-xs font-medium rounded-full #{classes}"
+  end
+  
+  def format_currency(amount)
+    return 'N/A' if amount.blank?
+    
+    "₹#{number_to_human(amount, units: { thousand: 'L', lakh: 'Cr' })}"
+  end
 end
