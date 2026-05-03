@@ -52,14 +52,10 @@
             <% end %>
           <% end %>
         </div>
-      <% elsif user_signed_in? %>
+      <% elsif user_signed_in? && current_user.customer? %>
+        <!-- Customer users don't need action buttons in hero -->
+      <% elsif user_signed_in? && !current_user.customer? %>
         <div class="flex gap-3">
-          <%= link_to properties_path, class: "flex items-center gap-2 bg-white text-slate-900 px-6 py-3 rounded-xl font-semibold hover:bg-slate-100 transition transform hover:scale-105 shadow-lg" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-            </svg>
-            Browse Properties
-          <% end %>
           <%= link_to leads_path, class: "flex items-center gap-2 bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-600 transition transform hover:scale-105 shadow-lg" do %>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -294,9 +290,6 @@
           <%= link_to projects_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all transform hover:scale-105 shadow-lg" do %>
             Create First Project
           <% end %>
-          <%= link_to properties_path, class: "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 px-8 py-4 rounded-2xl font-semibold transition-all" do %>
-            Browse Properties
-          <% end %>
         </div>
       <% else %>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -317,40 +310,3 @@
   <% end %>
 </div>
 
-<!-- Contact Builder Section -->
-<% if @builders.any? && !user_signed_in? %>
-<div class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl p-8 mb-8">
-  <div class="text-center">
-    <h3 class="text-2xl font-['Playfair_Display'] font-bold text-gray-900 mb-4">Interested in Our Properties?</h3>
-    <p class="text-gray-600 mb-6 max-w-2xl mx-auto">Get in touch with our experienced builders to discuss your dream home. We're here to help you find the perfect property.</p>
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <%= link_to contact_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all transform hover:scale-105 shadow-lg" do %>
-        Contact Builder
-      <% end %>
-      <% if @builders.first %>
-        <a href="mailto:<%= @builders.first.email %>" class="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-4 rounded-2xl font-semibold transition-all">
-          Email: <%= @builders.first.email %>
-        </a>
-      <% end %>
-    </div>
-  </div>
-</div>
-<% end %>
-
-<!-- Leads Management for Signed-in Users -->
-<% if user_signed_in? && !current_user.admin? && !current_user.builder? %>
-<div class="bg-white rounded-2xl p-8 border border-gray-200 mb-8">
-  <div class="text-center">
-    <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-      <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-      </svg>
-    </div>
-    <h3 class="text-2xl font-['Playfair_Display'] font-bold text-gray-900 mb-3">Leads Management</h3>
-    <p class="text-gray-500 text-lg max-w-md mx-auto mb-8">Welcome to your leads dashboard. Manage customer inquiries and track your sales progress.</p>
-    <%= link_to leads_path, class: "bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all transform hover:scale-105 shadow-lg" do %>
-      Manage Leads
-    <% end %>
-  </div>
-</div>
-<% end %>

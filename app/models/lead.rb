@@ -16,9 +16,9 @@ class Lead < ApplicationRecord
   }
 
   # Validations
-  validates :name, presence: true
-  validates :phone, presence: true, format: { with: /\A\d{10}\z/, message: "must be 10 digits" }
-  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :customer_name, presence: true
+  validates :customer_phone, presence: true, format: { with: /\A\d{10}\z/, message: "must be 10 digits" }
+  validates :customer_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
 
   # Scopes
   scope :recent, -> { order(created_at: :desc) }
@@ -26,39 +26,40 @@ class Lead < ApplicationRecord
   scope :by_status, ->(status) { where(stage: status) if status.present? }
   scope :for_user, ->(user) { where(user: user) }
   
-  # Search scope
+  # Search scope - improved for safety
   scope :search, ->(query) {
-    return where(nil) if query.blank?
+    return all if query.blank?
     
+    sanitized_query = ActiveRecord::Base.sanitize_sql_like(query.to_s.strip)
     where(
-      "name ILIKE :query OR phone ILIKE :query OR property_name ILIKE :query OR email ILIKE :query",
-      query: "%#{query}%"
+      "customer_name ILIKE ? OR customer_phone ILIKE ? OR property_name ILIKE ? OR customer_email ILIKE ?",
+      "%#{sanitized_query}%", "%#{sanitized_query}%", "%#{sanitized_query}%", "%#{sanitized_query}%"
     )
   }
 
-  # Helper methods for field name compatibility
-  def customer_name
-    name
+  # Backward compatibility methods for old field names
+  def name
+    customer_name
   end
   
-  def customer_name=(value)
-    self.name = value
+  def name=(value)
+    self.customer_name = value
   end
   
-  def customer_phone
-    phone
+  def phone
+    customer_phone
   end
   
-  def customer_phone=(value)
-    self.phone = value
+  def phone=(value)
+    self.customer_phone = value
   end
   
-  def customer_email
-    email
+  def email
+    customer_email
   end
   
-  def customer_email=(value)
-    self.email = value
+  def email=(value)
+    self.customer_email = value
   end
 
   # Dashboard helper methods

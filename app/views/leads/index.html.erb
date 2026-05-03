@@ -3,8 +3,12 @@
     <h1 class="text-2xl font-['Playfair_Display'] font-semibold">Lead Management</h1>
     <p class="text-sm text-gray-400 mt-1"><%= @leads.count %> leads</p>
   </div>
-  <%= link_to "New Lead", new_lead_path,
-        class: "flex items-center gap-1.5 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition" %>
+  <div class="flex gap-3">
+    <%= link_to "View Interests", interests_path,
+          class: "flex items-center gap-1.5 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition" %>
+    <%= link_to "New Lead", new_lead_path,
+          class: "flex items-center gap-1.5 bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition" %>
+  </div>
 </div>
 
 <!-- Filters -->
@@ -52,20 +56,36 @@
           <tr class="hover:bg-gray-50 <%= 'bg-yellow-50' if lead.follow_up_date == Date.current %>">
             <td class="py-3 px-4">
               <div>
-                <p class="font-medium text-gray-900"><%= lead.name %></p>
+                <p class="font-medium text-gray-900"><%= lead.customer_name %></p>
                 <p class="text-sm text-gray-500"><%= lead.email %></p>
               </div>
             </td>
             <td class="py-3 px-4 text-sm text-gray-900"><%= lead.phone %></td>
             <td class="py-3 px-4">
               <div>
-                <p class="text-sm text-gray-900"><%= lead.property_name || (lead.property&.name) || 'N/A' %></p>
-                <p class="text-xs text-gray-500"><%= lead.property_location || (lead.property&.location) %></p>
+                <% if lead.property&.title %>
+                  <p class="text-sm text-gray-900"><%= lead.property.title %></p>
+                  <p class="text-xs text-gray-500"><%= lead.property.project&.name || 'Project not set' %></p>
+                <% elsif lead.property_name.present? %>
+                  <p class="text-sm text-gray-900"><%= lead.property_name %></p>
+                  <p class="text-xs text-gray-500"><%= lead.property_location || 'Location not set' %></p>
+                <% else %>
+                  <p class="text-sm text-gray-400">Property not specified</p>
+                <% end %>
               </div>
             </td>
             <td class="py-3 px-4">
-              <% if lead.budget.present? && lead.budget.to_f > 0 %>
-                <span class="text-sm text-green-600 font-medium">₹<%= number_to_currency(lead.budget, unit: '', precision: 0, delimiter: ',') %></span>
+              <% if lead.budget.present? %>
+                <% begin %>
+                  <% budget_value = lead.budget.to_f %>
+                  <% if budget_value > 0 %>
+                    <span class="text-sm text-green-600 font-medium">₹<%= number_to_currency(budget_value, unit: '', precision: 0, delimiter: ',') %></span>
+                  <% else %>
+                    <span class="text-sm text-gray-400">Budget not set</span>
+                  <% end %>
+                <% rescue %>
+                  <span class="text-sm text-gray-400">Invalid budget</span>
+                <% end %>
               <% else %>
                 <span class="text-sm text-gray-400">N/A</span>
               <% end %>
@@ -90,7 +110,7 @@
                     else
                       'bg-gray-100 text-gray-800'
                     end %>">
-                <%= lead.stage.humanize %>
+                <%= lead.stage&.humanize || 'Unknown Stage' %>
               </span>
             </td>
             <td class="py-3 px-4">

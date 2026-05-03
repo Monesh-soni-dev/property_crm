@@ -3,7 +3,13 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
-  enum role: {builder:  'builder',admin:    'admin',agent:    'agent',engineer: 'engineer'}
+  enum role: {
+    customer: 'customer',
+    builder:  'builder',
+    admin:    'admin',
+    agent:    'agent',
+    engineer: 'engineer'
+  }
   has_many :projects, dependent: :destroy
   has_many :leads, dependent: :destroy
 

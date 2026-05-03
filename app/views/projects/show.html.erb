@@ -138,7 +138,7 @@
   <div class="bg-white rounded-lg shadow-md p-6">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold text-gray-900">Properties in this Project</h2>
-      <% if user_signed_in? && @project.user == current_user %>
+      <% if user_signed_in? && @project.user == current_user && !current_user.customer? %>
         <%= link_to "Add Property", new_property_path(project_id: @project.id), class: "bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" %>
       <% end %>
     </div>

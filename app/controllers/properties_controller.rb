@@ -1,7 +1,7 @@
 # app/controllers/properties_controller.rb
 class PropertiesController < ApplicationController
-  before_action :authenticate_user!, except: [:index, :show]
-  before_action :set_project, except: [:index, :show]
+  before_action :authenticate_user!, except: [:index]
+  before_action :set_project
   before_action :set_property, only: [:show, :edit, :update, :destroy]
 
   def index
@@ -11,15 +11,30 @@ class PropertiesController < ApplicationController
     else
       @properties = Property.where(status: :available).includes(:project)
     end
-    @properties = @properties.where(project: @project) if @project
-    @q = @properties.ransack(params[:q])
-    @pagy, @properties = pagy(@q.result.includes(:project), items: 12)
+    @properties = @properties.where(project: @project) if @project.present?
+    
+    # Handle search if ransack is available
+    if defined?(Ransack)
+      @q = @properties.ransack(params[:q])
+      search_result = @q.result.includes(:project)
+    else
+      search_result = @properties
+    end
+    
+    # Handle pagination if pagy is available
+    if defined?(Pagy)
+      @pagy, @properties = pagy(search_result, items: 12)
+    else
+      @properties = search_result
+    end
   end
 
   def new
     if user_signed_in?
       @property = Property.new
       @property.project_id = params[:project_id] if params[:project_id].present?
+      # Set @project for proper back navigation
+      @project = Project.find(params[:project_id]) if params[:project_id].present?
       authorize @property
     else
       redirect_to new_user_session_path, alert: 'You need to sign in to create a property.'
@@ -32,13 +47,15 @@ class PropertiesController < ApplicationController
     authorize @property
     
     if @property.save
-      redirect_to @property, notice: "Property added successfully."
+      redirect_path = @project ? project_property_path(@project, @property) : property_path(@property)
+      redirect_to redirect_path, notice: "Property added successfully."
     else
       render :new, status: :unprocessable_entity
     end
   end
 
   def show
+    authorize @property
     # @property is already set by set_property before_action
   end
 
@@ -64,7 +81,7 @@ class PropertiesController < ApplicationController
   private
 
   def set_project
-    @project = Project.find(params[:project_id]) if params[:project_id]
+    @project = Project.find(params[:project_id]) if params[:project_id].present?
   end
 
   def set_property

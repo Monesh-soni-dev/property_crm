@@ -1,24 +1,37 @@
 class LeadsController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user!, except: [:create]
   before_action :set_lead, only: [:show, :edit, :update, :destroy]
+  before_action :set_project_and_property, only: [:create]
 
   def index
-    @leads = current_user.leads.includes(:activities)
+    # Check if user is authorized to view leads
+    authorize Lead
     
-    # Apply filters
-    @leads = @leads.by_status(params[:status]) if params[:status].present?
-    @leads = @leads.search(params[:search]) if params[:search].present?
+    # Get leads for current user
+    @leads = current_user.leads.includes(:project, :property, :activities)
+    
+    # Apply filters safely
+    if params[:status].present? && Lead.stages.keys.include?(params[:status])
+      @leads = @leads.where(stage: params[:status])
+    end
+    
+    if params[:search].present?
+      search_term = params[:search].strip
+      if search_term.length > 0
+        @leads = @leads.search(search_term)
+      end
+    end
     
     # Apply follow-up date filters
     case params[:follow_up]
     when 'today'
-      @leads = @leads.today_followups
+      @leads = @leads.where(follow_up_date: Date.current)
     when 'upcoming'
       @leads = @leads.where('follow_up_date >= ?', Date.current)
     end
     
-    @leads = @leads.recent
-    authorize Lead
+    # Order by most recent
+    @leads = @leads.order(created_at: :desc)
   end
 
   def show
@@ -31,14 +44,63 @@ class LeadsController < ApplicationController
   end
 
   def create
-    @lead = current_user.leads.build(lead_params)
-    authorize @lead
+    if user_signed_in?
+      # Authenticated user creating a lead
+      if @project.present?
+        # Creating lead through project nested route
+        @lead = @project.user.leads.build(lead_params)
+        @lead.project = @project
+        @lead.user = @project.user
+      else
+        # Creating lead through standalone route
+        @lead = current_user.leads.build(lead_params)
+      end
+      
+      # Set property if specified
+      if @property.present?
+        @lead.property = @property
+        @lead.project = @property.project
+      end
+      
+      authorize @lead
+      success_redirect = @lead
+    else
+      # Visitor expressing interest in a property
+      if @property.present?
+        @lead = @property.project.user.leads.build(lead_params)
+        @lead.property = @property
+        @lead.project = @property.project
+        @lead.stage = 'new_lead'
+        success_redirect = project_property_path(@property.project, @property)
+      else
+        @lead = Lead.new(lead_params)
+        success_redirect = root_path
+      end
+    end
     
     if @lead.save
-      redirect_to @lead, notice: 'Lead was successfully created.'
+      if user_signed_in?
+        redirect_to success_redirect, notice: 'Lead was successfully created.'
+      else
+        redirect_to success_redirect, notice: 'Thank you for your interest! We will contact you soon.'
+      end
     else
-      flash.now[:alert] = 'Please fix the errors below.'
-      render :new, status: :unprocessable_entity
+      if user_signed_in?
+        if @project.present?
+          # If coming from project nested route, render the property show page
+          redirect_to project_property_path(@project, @property), alert: 'Please check your information and try again.'
+        else
+          flash.now[:alert] = 'Please fix the errors below.'
+          render :new, status: :unprocessable_entity
+        end
+      else
+        # For non-authenticated users, redirect back with error
+        if @property.present?
+          redirect_to project_property_path(@property.project, @property), alert: 'Please check your information and try again.'
+        else
+          redirect_to root_path, alert: 'Please check your information and try again.'
+        end
+      end
     end
   end
 
@@ -82,13 +144,39 @@ class LeadsController < ApplicationController
 
   private
 
+  def set_project_and_property
+    if params[:project_id].present?
+      @project = Project.find(params[:project_id])
+    end
+    
+    if params[:lead]&.dig(:property_id).present?
+      @property = Property.find(params[:lead][:property_id])
+      @project ||= @property.project
+    end
+  end
+
   def set_lead
-    @lead = current_user.leads.find(params[:id])
+    if user_signed_in?
+      # Try to find lead in current user's leads first
+      @lead = current_user.leads.find_by(id: params[:id])
+      
+      # If not found, check if it's a lead for user's properties (interest converted to lead)
+      unless @lead
+        @lead = Lead.joins(property: :project)
+                   .where(projects: { user_id: current_user.id })
+                   .find_by(id: params[:id])
+      end
+      
+      # Final fallback for admin access
+      @lead ||= current_user.leads.find(params[:id])
+    else
+      @lead = Lead.find(params[:id])
+    end
   end
 
   def lead_params
-    params.require(:lead).permit(:name, :email, :phone, :property_name, 
-                                  :property_location, :property_type, :budget, 
+    params.require(:lead).permit(:name, :email, :phone, :customer_name, :customer_email, :customer_phone,
+                                  :property_name, :property_location, :property_type, :budget, 
                                   :source, :stage, :follow_up_date, :notes,
                                   :project_id, :property_id)
   end

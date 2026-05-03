@@ -11,12 +11,15 @@ Rails.application.routes.draw do
   get '/500', to: 'errors#internal_server_error', as: :internal_server_error
 
   resources :properties
+  resources :interests, only: [:index]
   resources :leads do
     member { patch :update_stage }
     resources :activities, only: [:create, :destroy]
   end  
   resources :projects do
-    resources :properties, except: [:index]
+    resources :properties, except: [:index] do
+      resources :interests, only: [:create]
+    end
 
     resources :leads do
       member { patch :update_stage }

@@ -4,7 +4,7 @@
       <h1 class="text-3xl font-bold text-gray-900">All Projects</h1>
       <p class="text-sm text-gray-600 mt-1"><%= @total_projects %> total projects · <%= @active_projects %> active</p>
     </div>
-    <% if user_signed_in? %>
+    <% if user_signed_in? && !current_user.customer? %>
       <%= link_to "New Project", new_project_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg" %>
     <% end %>
   </div>
@@ -76,7 +76,7 @@
       <div class="text-6xl mb-4">🏗️</div>
       <h3 class="text-xl font-semibold text-gray-900 mb-2">No Projects Found</h3>
       <p class="text-gray-500 mb-6">There are no projects available at the moment.</p>
-      <% if user_signed_in? %>
+      <% if user_signed_in? && !current_user.customer? %>
         <%= link_to "Create Your First Project", new_project_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold shadow-lg transition-all transform hover:scale-105" %>
       <% else %>
         <%= link_to "Sign In to Create Projects", new_user_session_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-semibold shadow-lg transition-all transform hover:scale-105" %>

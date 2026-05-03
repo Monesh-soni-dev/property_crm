@@ -1,0 +1,90 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Property Interests</h1>
+      <p class="text-gray-600 mt-2">People who have shown interest in your properties</p>
+    </div>
+
+    <% if @interests.any? %>
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 bg-gray-50 border-b">
+          <h2 class="text-lg font-medium text-gray-900">Recent Interests (<%= @interests.count %>)</h2>
+        </div>
+        
+        <div class="divide-y divide-gray-200">
+          <% @interests.each do |interest| %>
+            <div class="p-6 hover:bg-gray-50 transition-colors">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center space-x-4 mb-3">
+                    <div class="flex-shrink-0">
+                      <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-medium"><%= interest.name.first.upcase %></span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 class="text-lg font-medium text-gray-900"><%= interest.name %></h3>
+                      <p class="text-sm text-gray-500">Interested in <%= link_to interest.property.title, project_property_path(interest.property.project, interest.property), class: "text-blue-600 hover:text-blue-800" %></p>
+                    </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <p class="text-xs text-gray-500">Email</p>
+                      <p class="font-medium">
+                        <a href="mailto:<%= interest.email %>" class="text-blue-600 hover:text-blue-800">
+                          <%= interest.email %>
+                        </a>
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Phone</p>
+                      <p class="font-medium">
+                        <a href="tel:<%= interest.phone %>" class="text-blue-600 hover:text-blue-800">
+                          <%= interest.phone %>
+                        </a>
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500">Date</p>
+                      <p class="font-medium"><%= interest.created_at.strftime("%d %b %Y at %I:%M %p") %></p>
+                    </div>
+                  </div>
+                  
+                  <% if interest.message.present? %>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                      <p class="text-xs text-gray-500 mb-1">Message</p>
+                      <p class="text-sm text-gray-700"><%= interest.message %></p>
+                    </div>
+                  <% end %>
+                </div>
+                
+                <div class="flex-shrink-0 ml-4">
+                  <%= link_to "Convert to Lead", new_lead_path(
+                    lead: {
+                      customer_name: interest.name,
+                      customer_email: interest.email,
+                      customer_phone: interest.phone,
+                      property_id: interest.property.id,
+                      project_id: interest.property.project.id,
+                      notes: interest.message,
+                      source: "property_interest"
+                    }
+                  ), class: "bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-lg shadow-md p-8 text-center">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No interests yet</h3>
+        <p class="text-gray-600">When people show interest in your properties, they'll appear here.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

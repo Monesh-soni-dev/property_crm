@@ -1,9 +1,9 @@
 <div class="mb-6">
   <nav class="text-sm text-gray-500 mb-2">
-    <%= link_to "Leads", leads_path, class: "hover:text-gray-900" %> / <%= @lead.name %>
+    <%= link_to "Leads", leads_path, class: "hover:text-gray-900" %> / <%= @lead.customer_name %>
   </nav>
   <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-['Playfair_Display'] font-semibold"><%= @lead.name %></h1>
+    <h1 class="text-2xl font-['Playfair_Display'] font-semibold"><%= @lead.customer_name %></h1>
     <div class="flex gap-3">
       <%= link_to "Edit Lead", edit_lead_path(@lead), 
           class: "bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition" %>
@@ -23,15 +23,15 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <p class="text-sm text-gray-500">Name</p>
-          <p class="font-medium"><%= @lead.name %></p>
+          <p class="font-medium"><%= @lead.customer_name %></p>
         </div>
         <div>
           <p class="text-sm text-gray-500">Phone</p>
-          <p class="font-medium"><%= @lead.phone %></p>
+          <p class="font-medium"><%= @lead.customer_phone %></p>
         </div>
         <div>
           <p class="text-sm text-gray-500">Email</p>
-          <p class="font-medium"><%= @lead.email.presence || 'Not provided' %></p>
+          <p class="font-medium"><%= @lead.customer_email.presence || 'Not provided' %></p>
         </div>
         <div>
           <p class="text-sm text-gray-500">Source</p>
@@ -46,11 +46,11 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <p class="text-sm text-gray-500">Property Name</p>
-          <p class="font-medium"><%= @lead.property_name.presence || @lead.property&.name || 'Not specified' %></p>
+          <p class="font-medium"><%= @lead.property_name.presence || @lead.property&.title || 'Not specified' %></p>
         </div>
         <div>
           <p class="text-sm text-gray-500">Location</p>
-          <p class="font-medium"><%= @lead.property_location.presence || @lead.property&.location || 'Not specified' %></p>
+          <p class="font-medium"><%= @lead.property_location.presence || @lead.property&.project&.location || 'Not specified' %></p>
         </div>
         <div>
           <p class="text-sm text-gray-500">Property Type</p>
@@ -89,7 +89,7 @@
               <div class="flex-1">
                 <p class="text-sm text-gray-900"><%= activity.description %></p>
                 <p class="text-xs text-gray-500 mt-1">
-                  <%= activity.activity_type&.humanize %> • 
+                  <%= activity.activity_type&.humanize || 'Activity' %> • 
                   <%= time_ago_in_words(activity.occurred_at) %> ago
                 </p>
               </div>
@@ -129,7 +129,7 @@
                 else
                   'bg-gray-100 text-gray-800'
                 end %>">
-            <%= @lead.stage.humanize %>
+            <%= @lead.stage&.humanize || 'Unknown Stage' %>
           </span>
         </div>
         
@@ -179,7 +179,7 @@
           <% if @lead.property %>
             <div>
               <p class="text-sm text-gray-500">Property</p>
-              <%= link_to @lead.property.name, property_path(@lead.property), 
+              <%= link_to @lead.property.title, property_path(@lead.property), 
                   class: "text-blue-600 hover:text-blue-800" %>
             </div>
           <% end %>

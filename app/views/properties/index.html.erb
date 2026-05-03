@@ -29,7 +29,7 @@
     </div>
     
     <div class="flex gap-3">
-      <% if user_signed_in? %>
+      <% if user_signed_in? && !current_user.customer? %>
         <%= link_to new_property_path, class: "flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg" do %>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -77,9 +77,10 @@
 </div>
 
 <!-- Properties Grid -->
+<% if @properties && @properties.any? %>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
   <% @properties.each do |property| %>
-    <%= link_to project_property_path(@project || property.project, property), class: "group block" do %>
+    <div class="group block">
       <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200 hover:border-blue-300">
         <div class="h-64 bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
           <% if property.images.attached? %>
@@ -95,10 +96,14 @@
           <!-- Status Badge -->
           <div class="absolute top-4 right-4">
             <span class="px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide backdrop-blur-md
-              <%= property.available? ? 'bg-emerald-500/90 text-white' :
-                 property.sold? ? 'bg-rose-500/90 text-white' :
-                 property.blocked? ? 'bg-amber-500/90 text-white' :
-                 'bg-gray-500/90 text-white' %>">
+              <%= case property.status
+                  when 'available' then 'bg-emerald-500/90 text-white'
+                  when 'sold' then 'bg-rose-500/90 text-white'
+                  when 'blocked' then 'bg-amber-500/90 text-white'
+                  when 'booked' then 'bg-blue-500/90 text-white'
+                  when 'registered' then 'bg-purple-500/90 text-white'
+                  else 'bg-gray-500/90 text-white'
+                  end %>">
               <%= property.status&.humanize || 'Unknown' %>
             </span>
           </div>
@@ -184,17 +189,46 @@
               </span>
             </div>
             
-            <div class="flex items-center text-blue-600 font-medium text-sm group">
-              View Details
-              <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-              </svg>
+            <div class="flex items-center text-blue-600 font-medium text-sm">
+              <% if user_signed_in? %>
+                <% property_url = @project ? project_property_path(@project, property) : property_path(property) %>
+                <%= link_to property_url, class: "flex items-center group-hover:text-blue-800 cursor-pointer" do %>
+                  View Details
+                  <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                <% end %>
+              <% else %>
+                <%= link_to new_user_registration_path, class: "flex items-center group-hover:text-blue-800 cursor-pointer" do %>
+                  Sign Up to View Details
+                  <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                <% end %>
+              <% end %>
             </div>
           </div>
         </div>
       </div>
-    <% end %>
+    </div>
   <% end %>
 </div>
+<% else %>
+<!-- Empty State -->
+<div class="bg-white rounded-3xl p-12 text-center border border-gray-200">
+  <div class="text-6xl mb-6">🏠</div>
+  <h3 class="text-2xl font-bold text-gray-900 mb-4">No Properties Found</h3>
+  <p class="text-gray-600 mb-6">
+    <% if params[:q].present? %>
+      No properties match your search criteria. Try adjusting your filters.
+    <% else %>
+      There are no properties available at the moment.
+    <% end %>
+  </p>
+  <% if user_signed_in? && !current_user.customer? %>
+    <%= link_to "Add Property", new_property_path, class: "bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-all" %>
+  <% end %>
+</div>
+<% end %>
 
 <%== @pagy.series_nav if @pagy.pages > 1 %>
