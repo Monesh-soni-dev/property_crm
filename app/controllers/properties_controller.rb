@@ -1,17 +1,13 @@
 # app/controllers/properties_controller.rb
 class PropertiesController < ApplicationController
-  before_action :authenticate_user!, except: [:index]
-  before_action :set_project
+  before_action :authenticate_user!, only: [:show, :edit, :update, :destroy]
+  before_action :set_project, only: [:new, :show, :edit, :update, :destroy]
   before_action :set_property, only: [:show, :edit, :update, :destroy]
 
   def index
-    if user_signed_in?
-      @properties = policy_scope(Property).includes(:project)
-      authorize Property
-    else
-      @properties = Property.where(status: :available).includes(:project)
-    end
-    @properties = @properties.where(project: @project) if @project.present?
+    # Public listing - show all properties to everyone
+    @properties = Property.includes(:project)
+    authorize Property
     
     # Handle search if ransack is available
     if defined?(Ransack)
@@ -33,8 +29,8 @@ class PropertiesController < ApplicationController
     if user_signed_in?
       @property = Property.new
       @property.project_id = params[:project_id] if params[:project_id].present?
-      # Set @project for proper back navigation
-      @project = Project.find(params[:project_id]) if params[:project_id].present?
+      Rails.logger.info "DEBUG NEW ACTION: @project = #{@project.inspect} (class: #{@project.class})"
+      # @project is set by set_project before_action
       authorize @property
     else
       redirect_to new_user_session_path, alert: 'You need to sign in to create a property.'
@@ -81,7 +77,11 @@ class PropertiesController < ApplicationController
   private
 
   def set_project
-    @project = Project.find(params[:project_id]) if params[:project_id].present?
+    if params[:project_id].present?
+      # Handle both direct ID and nested route cases
+      project_id = params[:project_id].to_s.split('/').last
+      @project = Project.find(project_id) if project_id.present?
+    end
   end
 
   def set_property

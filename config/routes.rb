@@ -2,8 +2,11 @@ Rails.application.routes.draw do
   # ActiveStorage routes
   mount ActiveStorage::Engine => "/rails/active_storage"
 
-  devise_for :users
-  root 'dashboard#index'
+  devise_for :users, controllers: {
+    registrations: 'users/registrations'
+  }
+  root 'properties#index'
+  get '/dashboard', to: 'dashboard#index'
 
   # Error pages
   get '/404', to: 'errors#not_found', as: :not_found
@@ -15,6 +18,12 @@ Rails.application.routes.draw do
   resources :leads do
     member { patch :update_stage }
     resources :activities, only: [:create, :destroy]
+  end
+  
+  # User profile routes
+  scope :dashboard do
+    resource :profile, controller: 'users', only: [:show, :edit, :update]
+    resource :account_settings, only: [:edit, :update]
   end  
   resources :projects do
     resources :properties, except: [:index] do

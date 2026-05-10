@@ -1,27 +1,23 @@
 class DashboardController < ApplicationController
+  before_action :authenticate_user!
   def index
     if user_signed_in?
-      if current_user.builder?
-        # Builders see only their own properties and projects
-        @properties = Property.includes(:project).where(user: current_user)
-        @projects = current_user.projects.includes(:properties)
-        @is_builder_dashboard = true
-      elsif current_user.admin?
-        # Admins see all properties
-        @properties = Property.includes(:project).all
-        @projects = Project.all
-        @is_builder_dashboard = false
-      else
-        # Agents, engineers, and other users see all available properties (public view)
-        @properties = Property.includes(:project).where(status: :available)
-        @projects = Project.all
-        @is_builder_dashboard = false
-      end
+      # Debug: Log current user and properties
+      Rails.logger.info "DASHBOARD DEBUG: Current user = #{current_user.id} - #{current_user.email} - #{current_user.role}"
+      Rails.logger.info "DASHBOARD DEBUG: Session user_id = #{session['warden.user.user_id']}"
+      
+      @properties = current_user.properties.includes(:project)
+      Rails.logger.info "DASHBOARD DEBUG: Properties count = #{@properties.count}"
+      Rails.logger.info "DASHBOARD DEBUG: Properties IDs = #{@properties.pluck(:id)}"
+      Rails.logger.info "DASHBOARD DEBUG: Properties user_ids = #{@properties.pluck(:user_id)}"
+      
+      @projects = current_user.projects.includes(:properties)
+      @is_builder_dashboard = current_user.builder?
+      @is_agent_dashboard = current_user.agent?
     else
-      # Guests see only available properties
-      @properties = Property.includes(:project).where(status: :available)
-      @projects = Project.all
-      @is_builder_dashboard = false
+      # Guests redirect to properties page
+      redirect_to properties_path
+      return
     end
     
     # Calculate stats based on filtered properties

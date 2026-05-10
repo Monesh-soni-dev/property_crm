@@ -13,26 +13,26 @@
 
   <%= render "layouts/header" %>
 
-  <main class="max-w-7xl mx-auto px-6 py-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
     <%#= render "layouts/breadcrumb" %>
 
     <% if notice.present? %>
-      <div class="mb-6 px-6 py-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-sm font-medium shadow-sm">
+      <div class="mb-4 sm:mb-6 px-4 sm:px-6 py-3 sm:py-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl sm:rounded-2xl text-sm font-medium shadow-sm">
         <div class="flex items-center gap-3">
-          <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
-          <%= notice %>
+          <span class="break-words"><%= notice %></span>
         </div>
       </div>
     <% end %>
     <% if alert.present? %>
-      <div class="mb-6 px-6 py-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-sm font-medium shadow-sm">
+      <div class="mb-4 sm:mb-6 px-4 sm:px-6 py-3 sm:py-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl sm:rounded-2xl text-sm font-medium shadow-sm">
         <div class="flex items-center gap-3">
-          <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-rose-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
           </svg>
-          <%= alert %>
+          <span class="break-words"><%= alert %></span>
         </div>
       </div>
     <% end %>

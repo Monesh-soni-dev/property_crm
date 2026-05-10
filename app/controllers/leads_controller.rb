@@ -4,11 +4,26 @@ class LeadsController < ApplicationController
   before_action :set_project_and_property, only: [:create]
 
   def index
-    # Check if user is authorized to view leads
-    authorize Lead
-    
-    # Get leads for current user
-    @leads = current_user.leads.includes(:project, :property, :activities)
+    # Only allow builders/property owners to view leads - check before authorization
+    if current_user.admin? || current_user.builder? || current_user.agent? || current_user.engineer?
+      authorize Lead
+      # Get leads for current user (builders, agents, engineers)
+      @leads = current_user.leads.includes(:project, :property, :activities)
+    elsif current_user.customer?
+      # Check if customer owns at least 1 property
+      if current_user.projects.exists?
+        authorize Lead
+        @leads = current_user.leads.includes(:project, :property, :activities)
+      else
+        # Customer with no properties gets access denied
+        redirect_to root_path, notice: "Welcome! You can explore amazing properties and connect with property professionals directly. Our team is here to help you find your dream property!"
+        return
+      end
+    else
+      # Other roles get access denied
+      redirect_to root_path, notice: "Welcome! You can explore amazing properties and connect with property professionals directly. Our team is here to help you find your dream property!"
+      return
+    end
     
     # Apply filters safely
     if params[:status].present? && Lead.stages.keys.include?(params[:status])
@@ -35,12 +50,26 @@ class LeadsController < ApplicationController
   end
 
   def show
-    authorize @lead
+    if @lead.present?
+      # Only allow authorized users to view leads
+      if current_user.admin? || current_user.builder? || current_user.agent? || current_user.engineer?
+        authorize @lead
+      else
+        redirect_to leads_path, alert: "Access denied. Leads are only visible to property professionals."
+      end
+    else
+      redirect_to leads_path, alert: "Lead not found."
+    end
   end
 
   def new
-    @lead = current_user.leads.build
-    authorize @lead
+    # Only allow authorized users to create leads
+    if current_user.admin? || current_user.builder? || current_user.agent? || current_user.engineer?
+      @lead = current_user.leads.build
+      authorize @lead
+    else
+      redirect_to leads_path, alert: "Access denied. Leads are only accessible to property professionals."
+    end
   end
 
   def create
@@ -67,14 +96,27 @@ class LeadsController < ApplicationController
     else
       # Visitor expressing interest in a property
       if @property.present?
+        # Check for duplicate interest for visitors
+        existing_lead = Lead.where(property_id: @property.id).where(
+          email: lead_params[:email],
+          phone: lead_params[:phone]
+        ).first
+        
+        if existing_lead.present?
+          redirect_to project_property_path(@property.project, @property), alert: "You have already shown interest in this property. You can only express interest once per property."
+          return
+        end
+        
         @lead = @property.project.user.leads.build(lead_params)
         @lead.property = @property
         @lead.project = @property.project
         @lead.stage = 'new_lead'
         success_redirect = project_property_path(@property.project, @property)
+        success_message = 'Thank you for your interest! The property owner will contact you soon.'
       else
         @lead = Lead.new(lead_params)
         success_redirect = root_path
+        success_message = 'Thank you for your inquiry! We will contact you soon.'
       end
     end
     
@@ -82,7 +124,8 @@ class LeadsController < ApplicationController
       if user_signed_in?
         redirect_to success_redirect, notice: 'Lead was successfully created.'
       else
-        redirect_to success_redirect, notice: 'Thank you for your interest! We will contact you soon.'
+        # For visitors, redirect back to property page with success message
+        redirect_to success_redirect, notice: success_message
       end
     else
       if user_signed_in?
@@ -105,7 +148,12 @@ class LeadsController < ApplicationController
   end
 
   def edit
-    authorize @lead
+    # Only allow authorized users to edit leads
+    if current_user.admin? || current_user.builder? || current_user.agent? || current_user.engineer?
+      authorize @lead
+    else
+      redirect_to leads_path, alert: "Access denied. Leads are only accessible to property professionals."
+    end
   end
 
   def update
@@ -126,7 +174,16 @@ class LeadsController < ApplicationController
   end
 
   def update_stage
-    @lead = current_user.leads.find(params[:id])
+    # Try to find lead in current user's leads first
+    @lead = current_user.leads.find_by(id: params[:id])
+    
+    # If not found, check if it's a lead for user's properties (interest converted to lead)
+    unless @lead
+      @lead = Lead.joins(property: :project)
+                   .where(projects: { user_id: current_user.id })
+                   .find_by(id: params[:id])
+    end
+    
     authorize @lead, :update?
     @lead.update!(stage: params[:stage])
 
@@ -168,7 +225,7 @@ class LeadsController < ApplicationController
       end
       
       # Final fallback for admin access
-      @lead ||= current_user.leads.find(params[:id])
+      @lead ||= current_user.leads.find_by(id: params[:id])
     else
       @lead = Lead.find(params[:id])
     end

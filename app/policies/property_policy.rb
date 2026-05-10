@@ -1,6 +1,6 @@
 class PropertyPolicy < ApplicationPolicy
   def index?
-    user.present?
+    true  # Allow all users to access properties index
   end
 
   def show?
@@ -21,14 +21,8 @@ class PropertyPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      if user&.admin? || user&.builder?
-        scope.all
-      elsif user.present?
-        # Customers and other authenticated users can see available properties
-        scope.where(status: :available)
-      else
-        scope.none
-      end
+      # Allow all users to see all properties on the root page
+      scope.all
     end
   end
 end

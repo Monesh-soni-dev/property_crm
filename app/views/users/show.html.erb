@@ -1,0 +1,103 @@
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
+    <p class="text-gray-600">View and manage your profile information</p>
+  </div>
+
+  <!-- Profile Card -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    <!-- Profile Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+      <div class="flex items-center space-x-6">
+        <div class="shrink-0">
+          <% if @user.photo.attached? %>
+            <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
+              <%= image_tag @user.photo, class: "w-full h-full object-cover" %>
+            </div>
+          <% else %>
+            <div class="w-24 h-24 rounded-full bg-white/20 border-4 border-white shadow-lg flex items-center justify-center">
+              <span class="text-3xl font-bold text-white"><%= @user.initials %></span>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="flex-1 text-white">
+          <h2 class="text-2xl font-bold mb-1"><%= @user.first_name&.to_s + " " + @user.last_name&.to_s %></h2>
+          <p class="text-blue-100"><%= @user.email %></p>
+          <div class="mt-2 flex items-center space-x-2">
+            <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
+              <%= @user.role.humanize %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Details -->
+    <div class="p-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Contact Information -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Contact Information</h3>
+          
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm font-medium text-gray-500">Mobile Number:</span>
+              <span class="text-sm text-gray-900"><%= @user.mobile_number || 'Not provided' %></span>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm font-medium text-gray-500">Email:</span>
+              <span class="text-sm text-gray-900"><%= @user.email %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Location Information -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">Location Information</h3>
+          
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm font-medium text-gray-500">Address:</span>
+              <span class="text-sm text-gray-900"><%= @user.address || 'Not provided' %></span>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm font-medium text-gray-500">City:</span>
+              <span class="text-sm text-gray-900"><%= @user.city || 'Not provided' %></span>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm font-medium text-gray-500">State:</span>
+              <span class="text-sm text-gray-900"><%= @user.state || 'Not provided' %></span>
+            </div>
+            
+            <div class="flex justify-between">
+              <span class="text-sm font-medium text-gray-500">Pincode:</span>
+              <span class="text-sm text-gray-900"><%= @user.pincode || 'Not provided' %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-8 flex flex-col sm:flex-row gap-4">
+        <%= link_to edit_profile_path, class: "inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-4h-4v4zm0 0h6v2H6v-2z"></path>
+          </svg>
+          Edit Profile
+        <% end %>
+        
+        <%= link_to account_settings_path, class: "inline-flex items-center justify-center px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors" do %>
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066-2.573c-.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-1.543.94-3.31.826-2.37 2.37a1.724 1.724 0 00-1.066-2.573C18.375 1.998 18.375.325 19.125.325c.75 0 1.088.699 1.088 1.563v1.375c0 .864-.338 1.563-1.088 1.563-.75 0-1.125-.699-1.125-1.563v-1.375c0-.864.338-1.563 1.088-1.563.75 0-1.125.699 1.125 1.563v-1.375z"></path>
+          </svg>
+          Account Settings
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

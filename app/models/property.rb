@@ -21,8 +21,9 @@ class Property < ApplicationRecord
   validates :area, presence: true, numericality: { greater_than: 0 }
   validates :status, inclusion: { in: statuses.keys }
   validates :project_id, presence: true
-  validates :contact_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
-  validates :contact_phone, format: { with: /\A[+]?[0-9\s\-()]{7,15}\z/ }, allow_blank: true
+  validates :contact_email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :contact_phone, presence: true, format: { with: /\A[+]?[0-9\s\-()]{7,15}\z/ }
+  validates :contact_person, presence: true, length: { minimum: 2 }
   validates :website, format: { with: /\Ahttps?:\/\/.+\z/ }, allow_blank: true
   
   # Conditional validation for bedrooms and bathrooms
