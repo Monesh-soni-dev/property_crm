@@ -19,6 +19,9 @@ class UsersController < ApplicationController
 
   # PATCH/PUT /dashboard/profile
   def update
+    # Clear any existing errors
+    @user.errors.clear
+    
     # Validate photo if present
     if user_params[:photo].present?
       validate_photo(user_params[:photo])
@@ -28,7 +31,7 @@ class UsersController < ApplicationController
       if @user.errors.empty? && @user.update(user_params)
         format.html do
           flash[:notice] = 'Profile was successfully updated.'
-          redirect_to dashboard_profile_path
+          redirect_to profile_path
         end
         format.json { render json: @user, status: :ok }
       else

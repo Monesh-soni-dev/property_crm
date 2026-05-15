@@ -3,12 +3,15 @@ class AccountSettingsController < ApplicationController
   
   def edit
     @user = current_user
-  authorize @user
+    authorize @user
   end
   
   def update
     @user = current_user
     authorize @user
+    
+    # Clear any existing errors
+    @user.errors.clear
     
     if @user.update(account_settings_params)
       redirect_to account_settings_path, notice: 'Account settings updated successfully.'

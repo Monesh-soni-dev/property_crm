@@ -24,6 +24,56 @@ class User < ApplicationRecord
   has_many :properties, dependent: :destroy
   has_many :leads, dependent: :destroy
 
+  # Methods
+  def full_name
+    if self[:full_name].present?
+      self[:full_name]
+    else
+      "#{first_name&.capitalize} #{last_name&.capitalize}".strip.presence || email.split('@').first
+    end
+  end
+
+  def initials
+    # Handle nil or empty user object safely
+    return "U" if self.nil?
+    
+    # Get first character safely
+    first_char = if first_name.present? && first_name.respond_to?(:[])
+      first_name[0]
+    elsif email.present? && email.respond_to?(:[])
+      email[0]
+    else
+      "U"
+    end
+    
+    # Get second character safely
+    second_char = if last_name.present? && last_name.respond_to?(:[])
+      last_name[0]
+    else
+      ""
+    end
+    
+    # Return uppercase initials
+    if first_char.present? && second_char.present?
+      "#{first_char}#{second_char}".upcase
+    elsif first_char.present?
+      first_char.upcase
+    else
+      "U"
+    end
+  rescue => e
+    "U"
+  end
+
+  def avatar_url
+    if photo.attached?
+      photo
+    else
+      # Generate a default avatar URL or use initials
+      nil
+    end
+  end
+
   private
 
   def remove_photo_if_checked
@@ -49,25 +99,6 @@ class User < ApplicationRecord
   # Photo validation will be handled in the controller
   # validates :photo, content_type: { in: ['image/png', 'image/jpg', 'image/jpeg'], message: 'must be a PNG, JPG, or JPEG' },
   # validates :photo, size: { less_than: 5.megabytes, message: 'must be less than 5MB' }
-
-  # Methods
-  def full_name
-    if self[:full_name].present?
-      self[:full_name]
-    else
-      "#{first_name&.capitalize} #{last_name&.capitalize}".strip.presence || email.split('@').first
-    end
-  end
-
-  def initials
-    if first_name.present? && last_name.present?
-      "#{first_name[0]}#{last_name[0]}".upcase
-    elsif first_name.present?
-      first_name[0].upcase
-    else
-      email[0].upcase
-    end
-  end
 
   def avatar_url
     if photo.attached?

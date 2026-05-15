@@ -26,6 +26,22 @@ class Property < ApplicationRecord
   validates :contact_person, presence: true, length: { minimum: 2 }
   validates :website, format: { with: /\Ahttps?:\/\/.+\z/ }, allow_blank: true
   
+  # New common fields validations
+  validates :city, presence: true, length: { maximum: 50 }
+  validates :state, presence: true, length: { maximum: 50 }
+  validates :pincode, format: { with: /\A\d{6}\z/ }, allow_blank: true
+  validates :address, length: { maximum: 500 }
+  validates :age_of_property, numericality: { greater_than_or_equal_to: 0, allow_blank: true }
+  validates :possession_status, inclusion: { in: ['ready_to_move', 'under_construction', 'immediate_possession'], allow_blank: true }
+  validates :parking, inclusion: { in: ['available', 'not_available', 'covered', 'open'], allow_blank: true }
+  validates :furnishing_status, inclusion: { in: ['furnished', 'semi_furnished', 'unfurnished'], allow_blank: true }
+  validates :water_supply, inclusion: { in: ['municipal', 'borewell', 'both'], allow_blank: true }
+  validates :power_backup, inclusion: { in: ['available', 'not_available'], allow_blank: true }
+  validates :transaction_type, inclusion: { in: ['resale', 'new_booking'], allow_blank: true }
+  validates :ownership_type, inclusion: { in: ['freehold', 'leasehold'], allow_blank: true }
+  validates :boundary_wall, inclusion: { in: ['compound', 'individual'], allow_blank: true }
+  validates :flooring_type, inclusion: { in: ['marble', 'tiles', 'wooden', 'vitrified'], allow_blank: true }
+  
   # Conditional validation for bedrooms and bathrooms
   validates :bedrooms, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, 
     if: :requires_bedrooms?
@@ -39,7 +55,7 @@ class Property < ApplicationRecord
   after_initialize :set_default_status, if: :new_record?
 
   def self.ransackable_attributes(auth_object = nil)
-    ["area", "bathrooms", "bedrooms", "contact_email", "contact_person", "contact_phone", "created_at", "description", "facing", "floor", "id", "id_value", "price", "project_id", "property_type", "status", "title", "unit_number", "updated_at", "user_id", "website"]
+    ["area", "bathrooms", "bedrooms", "contact_email", "contact_person", "contact_phone", "created_at", "description", "facing", "floor", "id", "id_value", "price", "project_id", "property_type", "status", "title", "unit_number", "updated_at", "user_id", "website", "city", "state", "pincode", "address", "features", "age_of_property", "possession_status", "parking", "furnishing_status", "water_supply", "power_backup", "road_width", "location_advantage", "transaction_type", "ownership_type", "boundary_wall", "flooring_type"]
   end
 
   private

@@ -91,12 +91,26 @@ class PropertiesController < ApplicationController
   end
 
   def property_params
-    params.require(:property).permit(
+    permitted_params = params.require(:property).permit(
       :project_id, :title, :unit_number, :floor, :property_type,
       :price, :area, :bedrooms, :bathrooms,
       :facing, :status, :description, 
       :contact_phone, :contact_email, :website, :contact_person, :additional_contact,
-      images: [], videos: []
+      :city, :state, :pincode, :address, :features, :age_of_property,
+      :possession_status, :parking, :furnishing_status, :water_supply,
+      :power_backup, :road_width, :location_advantage, :transaction_type,
+      :ownership_type, :boundary_wall, :flooring_type
     )
+    
+    # Only include images and videos if they are actually present
+    if params[:property][:images].present? && params[:property][:images].any? { |img| img.present? }
+      permitted_params[:images] = params[:property][:images]
+    end
+    
+    if params[:property][:videos].present? && params[:property][:videos].any? { |vid| vid.present? }
+      permitted_params[:videos] = params[:property][:videos]
+    end
+    
+    permitted_params
   end
 end
