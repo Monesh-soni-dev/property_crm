@@ -60,7 +60,7 @@ class LeadsController < ApplicationController
     @leads = @leads.order(created_at: :desc)
 
     # Paginate
-    @pagy, @leads = pagy(@leads, limit: 15)
+    @pagy, @leads = pagy(@leads, limit: 12)
   end
 
   def show
