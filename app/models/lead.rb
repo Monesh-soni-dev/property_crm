@@ -19,6 +19,7 @@ class Lead < ApplicationRecord
   validates :customer_name, presence: true
   validates :customer_phone, presence: true, format: { with: /\A\d{10}\z/, message: "must be 10 digits" }
   validates :customer_email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
+  validates :property_id, uniqueness: { scope: :user_id, message: "already has a lead for this property" }, allow_nil: true
 
   # Scopes
   scope :recent, -> { order(created_at: :desc) }

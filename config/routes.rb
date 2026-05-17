@@ -23,7 +23,7 @@ Rails.application.routes.draw do
   # User profile routes
   scope :dashboard do
     resource :profile, controller: 'users', only: [:show, :edit, :update]
-    resource :account_settings, only: [:edit, :update]
+    resource :account_settings, only: [:edit, :update, :destroy]
   end  
   resources :projects do
     resources :properties, except: [:index] do

@@ -44,9 +44,73 @@ module ApplicationHelper
                 class: "inline-flex px-2 py-1 text-xs font-medium rounded-full #{classes}"
   end
   
+  PROPERTY_TYPE_LABELS = {
+    '1bhk'             => '1 BHK Apartment',
+    '2bhk'             => '2 BHK Apartment',
+    '3bhk'             => '3 BHK Apartment',
+    '4bhk'             => '4 BHK Apartment',
+    'villa'            => 'Villa',
+    'plot'             => 'Plot / Land',
+    'commercial_office'=> 'Commercial Office',
+    'commercial_shop'  => 'Commercial Shop',
+    'warehouse'        => 'Warehouse',
+    'duplex'           => 'Duplex',
+    'penthouse'        => 'Penthouse',
+    'apartment'        => 'Apartment',
+    'studio'           => 'Studio'
+  }.freeze
+
+  def format_property_type(type)
+    PROPERTY_TYPE_LABELS[type.to_s] || type.to_s.gsub('_', ' ').titleize
+  end
+
+  # Build a pagination series array: e.g. [1, :gap, 5, "6", 7, :gap, 17]
+  # Current page is returned as a String, others as Integer, gaps as :gap
+  def pagy_series(pagy, slots: 7)
+    page = pagy.page
+    last = pagy.instance_variable_get(:@last)
+    return [] if last.nil? || last <= 1
+
+    series = if last <= slots
+               (1..last).to_a
+             else
+               half  = (slots - 1) / 2
+               start = if page <= half
+                         1
+                       elsif page > (last - slots + half)
+                         last - slots + 1
+                       else
+                         page - half
+                       end
+               s = (start...(start + slots)).to_a
+               if slots >= 7
+                 s[0]  = 1
+                 s[1]  = :gap unless s[1]  == 2
+                 s[-2] = :gap unless s[-2] == last - 1
+                 s[-1] = last
+               end
+               s
+             end
+
+    series.map { |p| p == page ? p.to_s : p }
+  end
+
+  def format_price(amount)
+    return 'Price not set' if amount.blank? || amount.to_f <= 0
+
+    val = amount.to_f
+    if val >= 10_000_000  # 1 Crore = 1,00,00,000
+      cr = val / 10_000_000.0
+      formatted = cr == cr.floor ? "#{cr.to_i}" : "#{'%.2f' % cr}".sub(/\.?0+$/, '')
+      "₹#{formatted} Cr"
+    else
+      l = val / 100_000.0
+      formatted = l == l.floor ? "#{l.to_i}" : "#{'%.2f' % l}".sub(/\.?0+$/, '')
+      "₹#{formatted} L"
+    end
+  end
+
   def format_currency(amount)
-    return 'N/A' if amount.blank?
-    
-    "₹#{number_to_human(amount, units: { thousand: 'L', lakh: 'Cr' })}"
+    format_price(amount)
   end
 end

@@ -58,6 +58,10 @@ class Property < ApplicationRecord
     ["area", "bathrooms", "bedrooms", "contact_email", "contact_person", "contact_phone", "created_at", "description", "facing", "floor", "id", "id_value", "price", "project_id", "property_type", "status", "title", "unit_number", "updated_at", "user_id", "website", "city", "state", "pincode", "address", "features", "age_of_property", "possession_status", "parking", "furnishing_status", "water_supply", "power_backup", "road_width", "location_advantage", "transaction_type", "ownership_type", "boundary_wall", "flooring_type"]
   end
 
+  def self.ransackable_associations(auth_object = nil)
+    ["project"]
+  end
+
   private
 
   def set_default_status

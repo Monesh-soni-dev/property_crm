@@ -166,13 +166,13 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="unit_floor_fields">
     <!-- Unit Number -->
     <div>
-      <%= form.label :unit_number, class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= form.label :unit_number, class: "block text-sm font-medium text-gray-700 mb-2" do %>Unit Number <span class="text-red-500">*</span><% end %>
       <%= form.text_field :unit_number, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "e.g., A-101, Plot 25, Unit 305", id: "property_unit_number" %>
       <p class="text-sm text-gray-500 mt-1" id="unit_help_text">Unit/Plot identification number</p>
     </div>
     <!-- Floor -->
     <div id="floor_field">
-      <%= form.label :floor, class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= form.label :floor, class: "block text-sm font-medium text-gray-700 mb-2" do %>Floor <span class="text-red-500">*</span><% end %>
       <%= form.number_field :floor, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "Floor number (0 for ground floor)", min: 0, id: "property_floor" %>
       <p class="text-sm text-gray-500 mt-1">Floor number (not applicable for plots)</p>
     </div>
@@ -556,7 +556,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Contact Person -->
       <div class="group">
-        <%= form.label :contact_person, "Contact Person", class: "block text-sm font-semibold text-gray-700 mb-2 group-hover:text-teal-600 transition-colors" %>
+        <%= form.label :contact_person, class: "block text-sm font-semibold text-gray-700 mb-2 group-hover:text-teal-600 transition-colors" do %>Contact Person <span class="text-red-500">*</span><% end %>
         <%= form.text_field :contact_person, class: "w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all hover:border-teal-300 bg-white shadow-sm", placeholder: "e.g., Rajesh Kumar, Sales Manager" %>
         <p class="text-xs text-gray-500 mt-2 flex items-center">
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -568,7 +568,7 @@
 
       <!-- Contact Phone -->
       <div class="group">
-        <%= form.label :contact_phone, "Contact Phone", class: "block text-sm font-semibold text-gray-700 mb-2 group-hover:text-teal-600 transition-colors" %>
+        <%= form.label :contact_phone, class: "block text-sm font-semibold text-gray-700 mb-2 group-hover:text-teal-600 transition-colors" do %>Contact Phone <span class="text-red-500">*</span><% end %>
         <%= form.telephone_field :contact_phone, class: "w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all hover:border-teal-300 bg-white shadow-sm", placeholder: "+91 98765 43210", pattern: "[+][9][1][0-9]{10}" %>
         <p class="text-xs text-gray-500 mt-2 flex items-center">
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -582,7 +582,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Contact Email -->
       <div class="group">
-        <%= form.label :contact_email, "Contact Email", class: "block text-sm font-semibold text-gray-700 mb-2 group-hover:text-teal-600 transition-colors" %>
+        <%= form.label :contact_email, class: "block text-sm font-semibold text-gray-700 mb-2 group-hover:text-teal-600 transition-colors" do %>Contact Email <span class="text-red-500">*</span><% end %>
         <%= form.email_field :contact_email, class: "w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all hover:border-teal-300 bg-white shadow-sm", placeholder: "sales@example.com" %>
         <p class="text-xs text-gray-500 mt-2 flex items-center">
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -882,46 +882,50 @@
     const floorField = document.getElementById('floor_field');
     const unitField = document.getElementById('property_unit_number');
     const unitHelpText = document.getElementById('unit_help_text');
-    
-    // Define residential types that need unit numbers and floors
-    const residentialTypes = ['1bhk', '2bhk', '3bhk', '4bhk', 'villa', 'duplex', 'penthouse'];
+
+    // Define type groups
+    const residentialTypes = ['1bhk', '2bhk', '3bhk', '4bhk', 'villa', 'duplex', 'penthouse', 'apartment', 'studio'];
     const plotTypes = ['plot'];
-    const commercialTypes = ['commercial_office', 'commercial_shop', 'warehouse'];
-    
+    const commercialTypes = ['commercial_office', 'commercial_shop', 'warehouse', 'commercial'];
+
     // Show/hide unit and floor fields based on property type
     if (plotTypes.includes(propertyType)) {
       // For plots - show unit field only, hide floor field
       unitFloorFields.style.display = 'grid';
       floorField.style.display = 'none';
-      document.getElementById('unit_floor_fields').style.gridTemplateColumns = '1fr 1fr'; // Keep two column layout but second column empty
       unitField.placeholder = 'e.g., Plot 25, Survey No. 123/A';
       unitHelpText.textContent = 'Plot number or survey number';
-      document.querySelector('#property_floor').removeAttribute('required');
-      
+      var floorEl = document.querySelector('#property_floor');
+      if (floorEl) floorEl.removeAttribute('required');
+
       // Hide bedroom/bathroom fields for plots
       bedroomBathroomFields.style.display = 'none';
-      document.querySelector('#property_bedrooms').removeAttribute('required');
-      document.querySelector('#property_bathrooms').removeAttribute('required');
+      var bedsEl = document.querySelector('#property_bedrooms');
+      var bathsEl = document.querySelector('#property_bathrooms');
+      if (bedsEl) bedsEl.removeAttribute('required');
+      if (bathsEl) bathsEl.removeAttribute('required');
+
     } else if (residentialTypes.includes(propertyType)) {
       // For residential - show both unit and floor fields
       unitFloorFields.style.display = 'grid';
       floorField.style.display = 'block';
-      document.getElementById('unit_floor_fields').style.gridTemplateColumns = '1fr 1fr';
       unitField.placeholder = 'e.g., A-101, Tower B-205';
       unitHelpText.textContent = 'Unit/Apartment number';
-      
-      // Show bedroom/bathroom fields for residential
+
+      // Show bedroom/bathroom fields
       bedroomBathroomFields.style.display = 'grid';
-      if (propertyType.includes('bhk') || propertyType === 'villa' || propertyType === 'duplex' || propertyType === 'penthouse') {
-        document.querySelector('#property_bedrooms').setAttribute('required', 'true');
-        document.querySelector('#property_bathrooms').setAttribute('required', 'true');
+      var bedsEl = document.querySelector('#property_bedrooms');
+      var bathsEl = document.querySelector('#property_bathrooms');
+      if (propertyType.includes('bhk') || ['villa', 'duplex', 'penthouse', 'apartment'].includes(propertyType)) {
+        if (bedsEl) bedsEl.setAttribute('required', 'true');
+        if (bathsEl) bathsEl.setAttribute('required', 'true');
       }
+
     } else if (commercialTypes.includes(propertyType)) {
       // For commercial - show both unit and floor fields
       unitFloorFields.style.display = 'grid';
       floorField.style.display = 'block';
-      document.getElementById('unit_floor_fields').style.gridTemplateColumns = '1fr 1fr';
-      
+
       if (propertyType === 'warehouse') {
         unitField.placeholder = 'e.g., Warehouse A, Godown 5';
         unitHelpText.textContent = 'Warehouse identification';
@@ -929,15 +933,18 @@
         unitField.placeholder = 'e.g., Shop 12, Office 305';
         unitHelpText.textContent = 'Shop/Office number';
       }
-      
+
       // Hide bedroom/bathroom fields for commercial
       bedroomBathroomFields.style.display = 'none';
-      document.querySelector('#property_bedrooms').removeAttribute('required');
-      document.querySelector('#property_bathrooms').removeAttribute('required');
+      var bedsEl = document.querySelector('#property_bedrooms');
+      var bathsEl = document.querySelector('#property_bathrooms');
+      if (bedsEl) bedsEl.removeAttribute('required');
+      if (bathsEl) bathsEl.removeAttribute('required');
+
     } else {
-      // Default - hide all conditional fields
-      unitFloorFields.style.display = 'none';
-      bedroomBathroomFields.style.display = 'none';
+      // No type selected — show all fields (let user fill as needed)
+      unitFloorFields.style.display = 'grid';
+      bedroomBathroomFields.style.display = 'grid';
     }
 
     // Auto-fill bedroom count for BHK apartments
@@ -962,5 +969,22 @@
     }
   }
 
+  // Run on page load (handles both new form and edit form with existing value)
+  document.addEventListener('turbo:load', function() {
+    const select = document.getElementById('property_type_select');
+    if (select) toggleFieldsByPropertyType();
+  });
+
+  // Fallback for non-Turbo page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('property_type_select');
+    if (select) toggleFieldsByPropertyType();
+  });
+
+  // Extra safety: run after slight delay in case Turbo hasn't finished
+  setTimeout(function() {
+    const select = document.getElementById('property_type_select');
+    if (select) toggleFieldsByPropertyType();
+  }, 100);
 
 </script>

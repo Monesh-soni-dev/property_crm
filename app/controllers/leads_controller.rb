@@ -7,13 +7,24 @@ class LeadsController < ApplicationController
     # Only allow builders/property owners to view leads - check before authorization
     if current_user.admin? || current_user.builder? || current_user.agent? || current_user.engineer?
       authorize Lead
-      # Get leads for current user (builders, agents, engineers)
-      @leads = current_user.leads.includes(:project, :property, :activities)
+      # Leads the user owns (their own submissions)
+      own_lead_ids = current_user.leads.pluck(:id)
+      # Leads submitted by others on properties belonging to this user's projects
+      property_lead_ids = Lead.joins(property: :project)
+                              .where(projects: { user_id: current_user.id })
+                              .pluck(:id)
+      all_ids = (own_lead_ids + property_lead_ids).uniq
+      @leads = Lead.where(id: all_ids).includes(:project, :property, :activities)
     elsif current_user.customer?
       # Check if customer owns at least 1 property
       if current_user.projects.exists?
         authorize Lead
-        @leads = current_user.leads.includes(:project, :property, :activities)
+        own_lead_ids = current_user.leads.pluck(:id)
+        property_lead_ids = Lead.joins(property: :project)
+                                .where(projects: { user_id: current_user.id })
+                                .pluck(:id)
+        all_ids = (own_lead_ids + property_lead_ids).uniq
+        @leads = Lead.where(id: all_ids).includes(:project, :property, :activities)
       else
         # Customer with no properties gets access denied
         redirect_to root_path, notice: "Welcome! You can explore amazing properties and connect with property professionals directly. Our team is here to help you find your dream property!"
@@ -47,6 +58,9 @@ class LeadsController < ApplicationController
     
     # Order by most recent
     @leads = @leads.order(created_at: :desc)
+
+    # Paginate
+    @pagy, @leads = pagy(@leads, limit: 15)
   end
 
   def show
@@ -74,25 +88,46 @@ class LeadsController < ApplicationController
 
   def create
     if user_signed_in?
-      # Authenticated user creating a lead
-      if @project.present?
-        # Creating lead through project nested route
+      showing_interest = @property.present? && @project.present? && @project.user_id != current_user.id
+
+      if showing_interest
+        # Agent/user expressing interest in another builder's property —
+        # assign the lead to current_user so the uniqueness check (user_id + property_id) works correctly.
+        # The builder can still see it via their property/project relationship.
+        existing = current_user.leads.find_by(property_id: @property.id)
+        if existing.present?
+          redirect_to project_property_path(@project, @property), alert: "You have already expressed interest in this property."
+          return
+        end
+        @lead = current_user.leads.build(lead_params)
+        @lead.property = @property
+        @lead.project = @project
+        @lead.stage = 'new_lead'
+        success_redirect = project_property_path(@project, @property)
+        success_message = 'Your interest has been sent to the property builder. They will contact you soon!'
+      elsif @project.present?
+        # Builder/owner creating a lead on their own project
         @lead = @project.user.leads.build(lead_params)
         @lead.project = @project
         @lead.user = @project.user
+        if @property.present?
+          @lead.property = @property
+          @lead.project = @property.project
+        end
+        success_redirect = @lead
+        success_message = 'Lead was successfully created.'
       else
-        # Creating lead through standalone route
+        # Standalone lead creation
         @lead = current_user.leads.build(lead_params)
+        if @property.present?
+          @lead.property = @property
+          @lead.project = @property.project
+        end
+        success_redirect = @lead
+        success_message = 'Lead was successfully created.'
       end
-      
-      # Set property if specified
-      if @property.present?
-        @lead.property = @property
-        @lead.project = @property.project
-      end
-      
+
       authorize @lead
-      success_redirect = @lead
     else
       # Visitor expressing interest in a property
       if @property.present?
@@ -121,12 +156,7 @@ class LeadsController < ApplicationController
     end
     
     if @lead.save
-      if user_signed_in?
-        redirect_to success_redirect, notice: 'Lead was successfully created.'
-      else
-        # For visitors, redirect back to property page with success message
-        redirect_to success_redirect, notice: success_message
-      end
+      redirect_to success_redirect, notice: success_message
     else
       if user_signed_in?
         if @project.present?
@@ -214,20 +244,18 @@ class LeadsController < ApplicationController
 
   def set_lead
     if user_signed_in?
-      # Try to find lead in current user's leads first
-      @lead = current_user.leads.find_by(id: params[:id])
-      
-      # If not found, check if it's a lead for user's properties (interest converted to lead)
-      unless @lead
-        @lead = Lead.joins(property: :project)
-                   .where(projects: { user_id: current_user.id })
-                   .find_by(id: params[:id])
+      if current_user.admin?
+        @lead = Lead.find_by(id: params[:id])
+      else
+        # Own leads
+        @lead = current_user.leads.find_by(id: params[:id])
+        # Leads on this user's properties (submitted by agents/others)
+        @lead ||= Lead.joins(property: :project)
+                      .where(projects: { user_id: current_user.id })
+                      .find_by(id: params[:id])
       end
-      
-      # Final fallback for admin access
-      @lead ||= current_user.leads.find_by(id: params[:id])
     else
-      @lead = Lead.find(params[:id])
+      @lead = Lead.find_by(id: params[:id])
     end
   end
 

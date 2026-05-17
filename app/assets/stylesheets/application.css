@@ -36,3 +36,69 @@
   padding: 5px 10px;
   text-decoration: none;
 }
+/* ── Pagy Series Nav Styles ───────────────────────────────────────────── */
+.pagy-nav-custom nav,
+.pagy-nav-custom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagy-nav-custom a,
+.pagy-nav-custom span[aria-disabled] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+/* Normal page links */
+.pagy-nav-custom a[href] {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+}
+
+.pagy-nav-custom a[href]:hover {
+  background: #eff6ff;
+  border-color: #60a5fa;
+  color: #2563eb;
+}
+
+/* Current / active page */
+.pagy-nav-custom a[aria-current="page"],
+.pagy-nav-custom span[aria-current="page"] {
+  background: #2563eb;
+  border: 1px solid #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(37,99,235,0.3);
+}
+
+/* Disabled prev/next */
+.pagy-nav-custom a[aria-disabled="true"],
+.pagy-nav-custom span[aria-disabled="true"]:not([role="separator"]) {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #d1d5db;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Gap separator */
+.pagy-nav-custom span[role="separator"],
+.pagy-nav-custom a[role="separator"] {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  cursor: default;
+  pointer-events: none;
+  min-width: 20px;
+}

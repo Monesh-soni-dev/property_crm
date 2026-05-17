@@ -1,7 +1,7 @@
 <div class="flex items-center justify-between mb-6">
   <div>
     <h1 class="text-2xl font-['Playfair_Display'] font-semibold">Lead Management</h1>
-    <p class="text-sm text-gray-400 mt-1"><%= @leads.count %> leads</p>
+    <p class="text-sm text-gray-400 mt-1"><%= @pagy ? @pagy.count : @leads.count %> leads</p>
   </div>
   <div class="flex gap-3">
     <%= link_to "View Interests", interests_path,
@@ -141,3 +141,66 @@
     </div>
   <% end %>
 </div>
+
+<!-- Pagination -->
+<% if @pagy && @pagy.pages > 1 %>
+  <div class="mt-6 pt-4 border-t border-gray-200">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+
+      <!-- Count info -->
+      <p class="text-sm text-gray-500 order-2 sm:order-1">
+        Showing
+        <span class="font-semibold text-gray-800"><%= @pagy.from %></span>
+        –
+        <span class="font-semibold text-gray-800"><%= @pagy.to %></span>
+        of
+        <span class="font-semibold text-gray-800"><%= @pagy.count %></span>
+        leads
+      </p>
+
+      <!-- Page buttons -->
+      <div class="flex items-center gap-1.5 order-1 sm:order-2">
+
+        <% if @pagy.previous %>
+          <% prev_url = @pagy.previous == 1 ? url_for(request.query_parameters.except("page")) : url_for(request.query_parameters.merge("page" => @pagy.previous)) %>
+          <%= link_to prev_url, class: "inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            <span class="hidden sm:inline">Prev</span>
+          <% end %>
+        <% else %>
+          <span class="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-300 cursor-not-allowed shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            <span class="hidden sm:inline">Prev</span>
+          </span>
+        <% end %>
+
+        <% pagy_series(@pagy).each do |item| %>
+          <% if item == :gap %>
+            <span class="inline-flex items-center justify-center w-9 h-9 text-gray-400 text-sm select-none">…</span>
+          <% elsif item.is_a?(String) %>
+            <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-600 text-white text-sm font-bold shadow-md ring-2 ring-blue-200">
+              <%= item %>
+            </span>
+          <% else %>
+            <% page_url = item == 1 ? url_for(request.query_parameters.except("page")) : url_for(request.query_parameters.merge("page" => item)) %>
+            <%= link_to item, page_url, class: "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" %>
+          <% end %>
+        <% end %>
+
+        <% if @pagy.next %>
+          <% next_url = url_for(request.query_parameters.merge("page" => @pagy.next)) %>
+          <%= link_to next_url, class: "inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" do %>
+            <span class="hidden sm:inline">Next</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          <% end %>
+        <% else %>
+          <span class="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-300 cursor-not-allowed shadow-sm">
+            <span class="hidden sm:inline">Next</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </span>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+<% end %>

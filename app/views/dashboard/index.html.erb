@@ -279,7 +279,7 @@
             <!-- Property Type Badge -->
             <div class="absolute top-4 left-4">
               <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-gray-800 text-xs font-semibold rounded-full">
-                <%= property.property_type&.titleize || 'Apartment' %>
+                <%= format_property_type(property.property_type) %>
               </span>
             </div>
           </div>

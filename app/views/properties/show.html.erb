@@ -2,7 +2,7 @@
   <div class="max-w-7xl mx-auto px-4 py-8">
     <!-- Back Navigation -->
     <div class="mb-8 animate-fade-in">
-      <%= link_to (@project ? project_properties_path(@project) : properties_path), 
+      <%= link_to (@project ? project_path(@project) : properties_path), 
           class: "inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md group" do %>
         <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -116,8 +116,10 @@
         </div>
         <div class="text-center md:text-right">
           <% if @property.price.present? && @property.price > 0 %>
-            <div class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">₹<%= number_with_delimiter(@property.price) %></div>
-            <div class="text-sm text-gray-500 font-medium">₹<%= number_with_delimiter((@property.price.to_f / @property.area.to_f).round) %> per sq ft</div>
+            <div class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2"><%= format_price(@property.price) %></div>
+            <% if @property.area.to_f > 0 %>
+              <div class="text-sm text-gray-500 font-medium">₹<%= number_with_delimiter((@property.price.to_f / @property.area.to_f).round) %> per sq ft</div>
+            <% end %>
           <% else %>
             <div class="text-xl text-gray-500 font-medium">Price not set</div>
           <% end %>
@@ -142,419 +144,263 @@
 
   <!-- Property Information Grid -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    
+
     <!-- Property Overview -->
-    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg border border-blue-100 p-8 animate-slide-up">
-      <div class="flex items-center mb-6">
-        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m1 4v-4m1 4h-1m-1 4h-1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+
+      <!-- Card Header -->
+      <div class="bg-gradient-to-r from-blue-700 to-blue-500 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
           </svg>
+          <h2 class="text-base font-bold text-white tracking-wide">Property Overview</h2>
         </div>
-        <div>
-          <h2 class="text-2xl font-bold text-gray-800">Property Overview</h2>
-          <p class="text-sm text-gray-600">Key specifications and features</p>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
+          <%= case @property.status
+              when 'available' then 'bg-green-400 text-white'
+              when 'sold'      then 'bg-red-400 text-white'
+              when 'booked'    then 'bg-yellow-400 text-gray-900'
+              when 'blocked'   then 'bg-orange-400 text-white'
+              when 'registered' then 'bg-purple-400 text-white'
+              else 'bg-gray-300 text-gray-800'
+              end %>">
+          <%= @property.status&.upcase || 'UNKNOWN' %>
+        </span>
+      </div>
+
+      <!-- Key stats tiles -->
+      <div class="grid grid-cols-4 border-b border-gray-100">
+        <div class="flex flex-col items-center gap-1 py-3.5 px-2 border-r border-gray-100 bg-blue-50/40">
+          <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+            </svg>
+          </div>
+          <span class="text-xl font-extrabold text-gray-900 leading-none"><%= @property.area.presence || '—' %></span>
+          <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wide">sq.ft Area</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 py-3.5 px-2 border-r border-gray-100 bg-green-50/40">
+          <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center">
+            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+          </div>
+          <span class="text-xl font-extrabold text-gray-900 leading-none"><%= @property.bedrooms || '—' %></span>
+          <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wide">Bedrooms</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 py-3.5 px-2 border-r border-gray-100 bg-purple-50/40">
+          <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center">
+            <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
+            </svg>
+          </div>
+          <span class="text-xl font-extrabold text-gray-900 leading-none"><%= @property.bathrooms || '—' %></span>
+          <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wide">Bathrooms</span>
+        </div>
+        <div class="flex flex-col items-center gap-1 py-3.5 px-2 bg-orange-50/40">
+          <div class="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center">
+            <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+          </div>
+          <span class="text-xl font-extrabold text-gray-900 leading-none"><%= @property.floor.presence || 'G' %></span>
+          <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wide">Floor</span>
         </div>
       </div>
-      
-      <div class="space-y-6">
-        <!-- Key Metrics -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="group text-center p-6 bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl border border-blue-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div class="text-3xl font-bold text-blue-700 group-hover:text-blue-800 transition-colors"><%= @property.area %></div>
-            <div class="text-sm font-medium text-blue-600 mt-1">Total Area</div>
-            <div class="text-xs text-gray-500">square feet</div>
+
+      <!-- Specs: 2-column grid — icon + label left, value right -->
+      <div class="grid grid-cols-2 divide-x divide-gray-100">
+
+        <!-- Property Type -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
+              <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"></path>
+              </svg>
+            </div>
+            <span class="text-xs text-gray-400 truncate">Type</span>
           </div>
-          <div class="group text-center p-6 bg-gradient-to-br from-green-100 to-green-50 rounded-2xl border border-green-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div class="text-3xl font-bold text-green-700 group-hover:text-green-800 transition-colors"><%= @property.bedrooms || 0 %></div>
-            <div class="text-sm font-medium text-green-600 mt-1">Bedrooms</div>
-            <div class="text-xs text-gray-500">rooms</div>
-          </div>
-          <div class="group text-center p-6 bg-gradient-to-br from-purple-100 to-purple-50 rounded-2xl border border-purple-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div class="text-3xl font-bold text-purple-700 group-hover:text-purple-800 transition-colors"><%= @property.bathrooms || 0 %></div>
-            <div class="text-sm font-medium text-purple-600 mt-1">Bathrooms</div>
-            <div class="text-xs text-gray-500">rooms</div>
-          </div>
-          <div class="group text-center p-6 bg-gradient-to-br from-orange-100 to-orange-50 rounded-2xl border border-orange-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
-            <div class="text-3xl font-bold text-orange-700 group-hover:text-orange-800 transition-colors"><%= @property.floor || 'G' %></div>
-            <div class="text-sm font-medium text-orange-600 mt-1">Floor</div>
-            <div class="text-xs text-gray-500">level</div>
-          </div>
+          <span class="text-xs font-semibold text-gray-800 ml-2 text-right"><%= @property.property_type.present? ? format_property_type(@property.property_type) : '—' %></span>
         </div>
-        
-        <!-- Project Information -->
-        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m1 4v-4m1 4h-1m-1 4h-1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-            </svg>
-            Project Information
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex justify-between items-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
-              <span class="text-gray-600 font-medium">Project Name</span>
-              <span class="font-bold text-purple-900"><%= @property.project.name %></span>
+
+        <!-- Facing -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-md bg-yellow-50 flex items-center justify-center shrink-0">
+              <svg class="w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-9h-1M4.34 12h-1m15.07-6.07l-.71.71M5.64 18.36l-.71.71m12.02 0l-.71-.71M6.34 5.64l-.71-.71"></path>
+              </svg>
             </div>
-            <div class="flex justify-between items-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
-              <span class="text-gray-600 font-medium">Location</span>
-              <span class="font-bold text-purple-900"><%= @property.project.location || 'Not specified' %></span>
-            </div>
-            <div class="flex justify-between items-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
-              <span class="text-gray-600 font-medium">Project Status</span>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-purple-500 text-white shadow-lg">
-                <%= @property.project.status&.humanize || 'Unknown' %>
-              </span>
-            </div>
-            <div class="flex justify-between items-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
-              <span class="text-gray-600 font-medium">Listed Date</span>
-              <span class="font-bold text-purple-900"><%= @property.created_at.strftime('%B %d, %Y') %></span>
-            </div>
+            <span class="text-xs text-gray-400 truncate">Facing</span>
           </div>
+          <span class="text-xs font-semibold text-gray-800 ml-2 text-right"><%= @property.facing&.titleize.presence || '—' %></span>
         </div>
-        
-        <!-- Additional Details -->
-        <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 mt-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Additional Information
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-              <span class="text-gray-600 font-medium">Property Type</span>
-              <span class="font-bold text-gray-900"><%= @property.property_type&.titleize || 'Not specified' %></span>
+
+        <!-- Furnishing -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-md bg-green-50 flex items-center justify-center shrink-0">
+              <svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+              </svg>
             </div>
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-              <span class="text-gray-600 font-medium">Facing</span>
-              <span class="font-bold text-gray-900"><%= @property.facing&.titleize || 'Not specified' %></span>
-            </div>
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-              <span class="text-gray-600 font-medium">Unit Number</span>
-              <span class="font-bold text-gray-900"><%= @property.unit_number %></span>
-            </div>
-            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-              <span class="text-gray-600 font-medium">Status</span>
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold
-                <%= case @property.status
-                    when 'available' then 'bg-green-100 text-green-800'
-                    when 'sold' then 'bg-red-100 text-red-800'
-                    when 'booked' then 'bg-blue-100 text-blue-800'
-                    when 'blocked' then 'bg-yellow-100 text-yellow-800'
-                    when 'registered' then 'bg-purple-100 text-purple-800'
-                    else 'bg-gray-100 text-gray-800'
-                    end %>">
-                <%= @property.status&.humanize || 'Unknown' %>
-              </span>
-            </div>
+            <span class="text-xs text-gray-400 truncate">Furnishing</span>
           </div>
+          <span class="text-xs font-semibold text-gray-800 ml-2 text-right"><%= @property.furnishing_status&.humanize.presence || '—' %></span>
         </div>
+
+        <!-- Parking -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-md bg-indigo-50 flex items-center justify-center shrink-0">
+              <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 17H3a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v2m-4 8h-4m4 0a4 4 0 004-4V9m0 8a4 4 0 01-4 4m0 0H7"></path>
+              </svg>
+            </div>
+            <span class="text-xs text-gray-400 truncate">Parking</span>
+          </div>
+          <span class="text-xs font-semibold text-gray-800 ml-2 text-right"><%= @property.parking&.humanize.presence || '—' %></span>
+        </div>
+
+        <!-- Possession -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-md bg-teal-50 flex items-center justify-center shrink-0">
+              <svg class="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <span class="text-xs text-gray-400 truncate">Possession</span>
+          </div>
+          <span class="text-xs font-semibold text-gray-800 ml-2 text-right"><%= @property.possession_status&.humanize.presence || '—' %></span>
+        </div>
+
+        <!-- Unit Number -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-md bg-pink-50 flex items-center justify-center shrink-0">
+              <svg class="w-3.5 h-3.5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+              </svg>
+            </div>
+            <span class="text-xs text-gray-400 truncate">Unit No.</span>
+          </div>
+          <span class="text-xs font-semibold text-gray-800 ml-2 text-right"><%= @property.unit_number.presence || '—' %></span>
+        </div>
+
       </div>
+
+      <!-- Listed date footer -->
+      <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+        <span class="text-xs text-gray-400">Listed on <%= @property.created_at.strftime('%d %b %Y') %></span>
+        <% if @property.age_of_property.present? %>
+          <span class="text-xs text-gray-600 font-medium"><%= @property.age_of_property %> yr old property</span>
+        <% end %>
+      </div>
+
     </div>
 
     <!-- Location & Additional Details -->
-    <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl shadow-lg border border-orange-100 p-8 mb-6 animate-slide-up">
-      <div class="flex items-center mb-6">
-        <div class="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-          </svg>
-        </div>
-        <div>
-          <h2 class="text-2xl font-bold text-gray-800">Location & Additional Details</h2>
-          <p class="text-sm text-gray-600">Complete property information and amenities</p>
-        </div>
+    <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+
+      <!-- Card Header -->
+      <div class="bg-gradient-to-r from-orange-600 to-orange-400 px-6 py-4 flex items-center gap-2.5">
+        <svg class="w-5 h-5 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <h2 class="text-base font-bold text-white tracking-wide">Location & Additional Details</h2>
       </div>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Location Information -->
-        <div class="space-y-6">
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-100">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-              </svg>
-              Location
-            </h3>
-            <div class="space-y-4">
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">City</span>
-                <span class="font-bold text-gray-900"><%= @property.city || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">State</span>
-                <span class="font-bold text-gray-900"><%= @property.state || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Pincode</span>
-                <span class="font-bold text-gray-900"><%= @property.pincode || 'Not specified' %></span>
-              </div>
-              <% if @property.address.present? %>
-                <div class="p-3 bg-orange-50 rounded-xl">
-                  <div class="text-gray-600 font-medium mb-2">Address</div>
-                  <div class="text-gray-900 font-medium"><%= @property.address %></div>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Property Features -->
-        <div class="space-y-6">
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-100">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 14h7v7m7-7h4m-4 0v4m0 4v-4m0-4h4m-4 0H3"></path>
-              </svg>
-              Features & Amenities
-            </h3>
-            <% if @property.features.present? %>
-              <div class="text-gray-800 leading-relaxed bg-orange-50 rounded-xl p-4">
-                <%= simple_format(@property.features) %>
-              </div>
-            <% else %>
-              <div class="text-gray-500 italic bg-orange-50 rounded-xl p-4">
-                No features specified
-              </div>
-            <% end %>
-          </div>
-          
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-100">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3l3 3m-9 3h6m-6 0h6m-6 0h.01M9 16h.01"></path>
-              </svg>
-              Property Specifications
-            </h3>
-            <div class="grid grid-cols-1 gap-3">
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Age</span>
-                <span class="font-bold text-gray-900"><%= @property.age_of_property ? "#{@property.age_of_property} years" : 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Possession</span>
-                <span class="font-bold text-gray-900"><%= @property.possession_status&.humanize || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Parking</span>
-                <span class="font-bold text-gray-900"><%= @property.parking&.humanize || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Furnishing</span>
-                <span class="font-bold text-gray-900"><%= @property.furnishing_status&.humanize || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Water Supply</span>
-                <span class="font-bold text-gray-900"><%= @property.water_supply&.humanize || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Power Backup</span>
-                <span class="font-bold text-gray-900"><%= @property.power_backup&.humanize || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Transaction</span>
-                <span class="font-bold text-gray-900"><%= @property.transaction_type&.humanize || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Ownership</span>
-                <span class="font-bold text-gray-900"><%= @property.ownership_type&.humanize || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Boundary Wall</span>
-                <span class="font-bold text-gray-900"><%= @property.boundary_wall&.humanize || 'Not specified' %></span>
-              </div>
-              <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                <span class="text-gray-600 font-medium">Flooring</span>
-                <span class="font-bold text-gray-900"><%= @property.flooring_type&.humanize || 'Not specified' %></span>
-              </div>
-              <% if @property.road_width.present? %>
-                <div class="flex justify-between items-center p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                  <span class="text-gray-600 font-medium">Road Width</span>
-                  <span class="font-bold text-gray-900"><%= @property.road_width %></span>
-                </div>
-              <% end %>
-            </div>
-          </div>
-          
-          <% if @property.location_advantage.present? %>
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-100">
-              <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                Location Advantages
-              </h3>
-              <div class="text-gray-800 leading-relaxed bg-orange-50 rounded-xl p-4">
-                <%= simple_format(@property.location_advantage) %>
-              </div>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    </div>
 
-    <!-- Project & Contact Information -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Project Information -->
-      <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-lg border border-purple-100 p-8 animate-slide-up">
-        <div class="flex items-center mb-6">
-          <div class="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m1 4v-4m1 4h-1m-1 4h-1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-2xl font-bold text-gray-800">Project Information</h2>
-            <p class="text-sm text-gray-600">Details about the project</p>
-          </div>
+      <!-- Location rows -->
+      <div class="divide-y divide-gray-100">
+        <div class="flex items-center justify-between px-5 py-3">
+          <span class="text-xs text-gray-400 uppercase tracking-wide">City</span>
+          <span class="text-sm font-semibold text-gray-800"><%= @property.city.presence || '—' %></span>
         </div>
-        <div class="space-y-4">
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100 hover:bg-white transition-colors">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-gray-600 font-medium">Project Name</span>
-              <%= link_to project_path(@property.project), 
-                  class: "text-purple-700 hover:text-purple-900 font-bold text-lg hover:underline transition-colors" do %>
-                <%= @property.project.name %>
-                <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-              <% end %>
-            </div>
-          </div>
-          
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100">
-            <div class="flex justify-between items-center">
-              <span class="text-gray-600 font-medium">Location</span>
-              <span class="font-bold text-gray-900"><%= @property.project.location || 'Not specified' %></span>
-            </div>
-          </div>
-          
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100">
-            <div class="flex justify-between items-center">
-              <span class="text-gray-600 font-medium">Status</span>
-              <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold
-                <%= case @property.status
-                    when 'available' then 'bg-green-500 text-white shadow-lg'
-                    when 'sold' then 'bg-red-500 text-white shadow-lg'
-                    when 'booked' then 'bg-blue-500 text-white shadow-lg'
-                    when 'blocked' then 'bg-yellow-500 text-white shadow-lg'
-                    when 'registered' then 'bg-purple-500 text-white shadow-lg'
-                    else 'bg-gray-500 text-white shadow-lg'
-                    end %>">
-                <%= @property.status&.humanize || 'Unknown' %>
-              </span>
-            </div>
-          </div>
-          
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100">
-            <div class="flex justify-between items-center">
-              <span class="text-gray-600 font-medium">Listed Date</span>
-              <span class="font-bold text-gray-900"><%= @property.created_at.strftime('%B %d, %Y') %></span>
-            </div>
-          </div>
+        <div class="flex items-center justify-between px-5 py-3">
+          <span class="text-xs text-gray-400 uppercase tracking-wide">State</span>
+          <span class="text-sm font-semibold text-gray-800"><%= @property.state.presence || '—' %></span>
         </div>
-      </div>
-      
-      <!-- Contact Information -->
-      <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl shadow-lg border border-teal-100 p-8 animate-slide-up">
-        <div class="flex items-center mb-6">
-          <div class="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center mr-3">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-2xl font-bold text-gray-800">Contact Information</h2>
-            <p class="text-sm text-gray-600">Get in touch for inquiries</p>
-          </div>
+        <div class="flex items-center justify-between px-5 py-3">
+          <span class="text-xs text-gray-400 uppercase tracking-wide">Pincode</span>
+          <span class="text-sm font-semibold text-gray-800"><%= @property.pincode.presence || '—' %></span>
         </div>
-        <% if @property.contact_person.present? || @property.contact_phone.present? || @property.contact_email.present? || @property.website.present? %>
-          <div class="space-y-4">
-            <% if @property.contact_person.present? %>
-              <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-teal-100 hover:bg-white transition-colors">
-                <div class="flex items-center mb-2">
-                  <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 007-7 7 0 00-7 7z"></path>
-                  </svg>
-                  <span class="text-gray-600 font-medium">Contact Person</span>
-                </div>
-                <div class="font-bold text-gray-900 text-lg"><%= @property.contact_person %></div>
-              </div>
-            <% end %>
-
-            <% if @property.contact_phone.present? %>
-              <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-teal-100 hover:bg-white transition-colors">
-                <div class="flex items-center mb-2">
-                  <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3a2 2 0 012 2v3a2 2 0 01-2 2h.5a.5.5 0 000 1H8v6a2 2 0 002 2h9.5a.5.5 0 000-1H18a2 2 0 002-2V7z"></path>
-                  </svg>
-                  <span class="text-gray-600 font-medium">Phone</span>
-                </div>
-                <a href="tel:<%= @property.contact_phone.gsub(/[^+0-9]/, '') %>" 
-                   class="text-teal-700 hover:text-teal-900 font-bold text-lg hover:underline transition-colors">
-                  <%= @property.contact_phone %>
-                </a>
-              </div>
-            <% end %>
-
-            <% if @property.contact_email.present? %>
-              <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-teal-100 hover:bg-white transition-colors">
-                <div class="flex items-center mb-2">
-                  <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                  </svg>
-                  <span class="text-gray-600 font-medium">Email</span>
-                </div>
-                <a href="mailto:<%= @property.contact_email %>" 
-                   class="text-teal-700 hover:text-teal-900 font-bold text-lg hover:underline transition-colors">
-                  <%= @property.contact_email %>
-                </a>
-              </div>
-            <% end %>
-
-            <% if @property.website.present? %>
-              <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-teal-100 hover:bg-white transition-colors">
-                <div class="flex items-center mb-2">
-                  <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9 0 019 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <span class="text-gray-600 font-medium">Website</span>
-                </div>
-                <a href="<%= @property.website %>" target="_blank" 
-                   class="text-teal-700 hover:text-teal-900 font-bold text-lg hover:underline transition-colors inline-flex items-center">
-                  <%= @property.website %>
-                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                </a>
-              </div>
-            <% end %>
-
-            <% if @property.additional_contact.present? %>
-              <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-teal-100">
-                <div class="flex items-center mb-3">
-                  <svg class="w-5 h-5 mr-2 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  <span class="text-gray-600 font-medium">Additional Information</span>
-                </div>
-                <div class="text-gray-800 leading-relaxed"><%= simple_format(@property.additional_contact) %></div>
-              </div>
-            <% end %>
-          </div>
-        <% else %>
-          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-teal-100 text-center">
-            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-            </svg>
-            <p class="text-gray-500 font-medium">No contact information available.</p>
+        <% if @property.address.present? %>
+          <div class="flex items-start justify-between px-5 py-3 gap-4">
+            <span class="text-xs text-gray-400 uppercase tracking-wide shrink-0 pt-0.5">Address</span>
+            <span class="text-sm font-semibold text-gray-800 text-right"><%= @property.address %></span>
           </div>
         <% end %>
       </div>
+
+      <!-- Section divider -->
+      <div class="px-5 py-2 bg-gray-50 border-y border-gray-100">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Additional Specifications</span>
+      </div>
+
+      <!-- Specs 2-col grid -->
+      <div class="grid grid-cols-2 divide-x divide-gray-100">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span class="text-xs text-gray-400">Age</span>
+          <span class="text-xs font-semibold text-gray-800"><%= @property.age_of_property.present? ? "#{@property.age_of_property} yrs" : '—' %></span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span class="text-xs text-gray-400">Water Supply</span>
+          <span class="text-xs font-semibold text-gray-800"><%= @property.water_supply&.humanize.presence || '—' %></span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span class="text-xs text-gray-400">Power Backup</span>
+          <span class="text-xs font-semibold text-gray-800"><%= @property.power_backup&.humanize.presence || '—' %></span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span class="text-xs text-gray-400">Transaction</span>
+          <span class="text-xs font-semibold text-gray-800"><%= @property.transaction_type&.humanize.presence || '—' %></span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span class="text-xs text-gray-400">Ownership</span>
+          <span class="text-xs font-semibold text-gray-800"><%= @property.ownership_type&.humanize.presence || '—' %></span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span class="text-xs text-gray-400">Boundary Wall</span>
+          <span class="text-xs font-semibold text-gray-800"><%= @property.boundary_wall&.humanize.presence || '—' %></span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <span class="text-xs text-gray-400">Flooring</span>
+          <span class="text-xs font-semibold text-gray-800"><%= @property.flooring_type&.humanize.presence || '—' %></span>
+        </div>
+        <% if @property.road_width.present? %>
+          <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <span class="text-xs text-gray-400">Road Width</span>
+            <span class="text-xs font-semibold text-gray-800"><%= @property.road_width %></span>
+          </div>
+        <% end %>
+      </div>
+
+      <% if @property.features.present? %>
+        <!-- Features & Amenities -->
+        <div class="px-5 py-2 bg-gray-50 border-y border-gray-100">
+          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Features & Amenities</span>
+        </div>
+        <div class="px-5 py-3 text-sm text-gray-700 leading-relaxed">
+          <%= simple_format(@property.features) %>
+        </div>
+      <% end %>
+
+      <% if @property.location_advantage.present? %>
+        <!-- Location Advantages -->
+        <div class="px-5 py-2 bg-gray-50 border-y border-gray-100">
+          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Location Advantages</span>
+        </div>
+        <div class="px-5 py-3 text-sm text-gray-700 leading-relaxed">
+          <%= simple_format(@property.location_advantage) %>
+        </div>
+      <% end %>
+
     </div>
+
   </div>
 
   <!-- Interested in Our Properties Section -->

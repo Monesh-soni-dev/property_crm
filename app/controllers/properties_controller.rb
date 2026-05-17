@@ -5,8 +5,8 @@ class PropertiesController < ApplicationController
   before_action :set_property, only: [:show, :edit, :update, :destroy]
 
   def index
-    # Public listing - show all properties to everyone
-    @properties = Property.includes(:project)
+    # Public listing - show all properties to everyone except sold ones
+    @properties = Property.includes(:project).where.not(status: 'sold')
     authorize Property
     
     # Handle search if ransack is available
@@ -19,10 +19,13 @@ class PropertiesController < ApplicationController
     
     # Handle pagination if pagy is available
     if defined?(Pagy)
-      @pagy, @properties = pagy(search_result, items: 12)
+      @pagy, @properties = pagy(search_result, limit: 12)
     else
       @properties = search_result
     end
+
+    @cities = Property.where.not(city: [nil, '']).distinct.order(:city).pluck(:city)
+    @project_names = Project.order(:name).pluck(:name)
   end
 
   def new
@@ -71,7 +74,7 @@ class PropertiesController < ApplicationController
   def destroy
     authorize @property
     @property.destroy
-    redirect_to @project ? project_properties_path(@project) : properties_path, notice: "Property deleted successfully."
+    redirect_to @project ? project_path(@project) : properties_path, notice: "Property deleted successfully."
   end
 
   private

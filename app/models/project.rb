@@ -12,4 +12,8 @@ class Project < ApplicationRecord
   validates :name, presence: true, length: { minimum: 2 }
   validates :status, presence: true
   validates :description, presence: true
+
+  def self.ransackable_attributes(auth_object = nil)
+    ["created_at", "description", "end_date", "id", "location", "name", "start_date", "status", "total_units", "updated_at", "user_id"]
+  end
 end

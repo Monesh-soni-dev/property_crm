@@ -49,30 +49,47 @@
 
 <!-- Filters Section -->
 <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-8">
-  <%= search_form_for @q, url: properties_path, class: "flex flex-wrap gap-4 items-end" do |f| %>
-    <div class="min-w-48">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Status Filter</label>
-      <%= f.select :status_eq, Property.statuses.keys.map { |s| [s.humanize, s] },
-            { include_blank: "All Status" },
-            class: "w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" %>
+  <%= search_form_for @q, url: properties_path, class: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 items-end" do |f| %>
+
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">City</label>
+      <%= f.search_field :city_cont, placeholder: "e.g. Mumbai, Pune",
+            class: "w-full border border-gray-300 rounded-xl px-3 py-2.5 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
     </div>
-    
-    <div class="min-w-48">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-      <%= f.select :property_type_eq, [['Apartment','apartment'], ['Villa','villa'], ['Plot','plot'], ['Commercial','commercial']],
+
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Project Name</label>
+      <%= f.search_field :project_name_cont, placeholder: "e.g. Sunrise Residency",
+            class: "w-full border border-gray-300 rounded-xl px-3 py-2.5 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Property Type</label>
+      <%= f.select :property_type_eq, [
+            ['1BHK Apartment', '1bhk'],
+            ['2BHK Apartment', '2bhk'],
+            ['3BHK Apartment', '3bhk'],
+            ['4BHK Apartment', '4bhk'],
+            ['Apartment', 'apartment'],
+            ['Villa', 'villa'],
+            ['Plot / Land', 'plot'],
+            ['Commercial', 'commercial'],
+            ['Commercial Office', 'commercial_office'],
+            ['Commercial Shop', 'commercial_shop'],
+            ['Warehouse', 'warehouse'],
+            ['Duplex', 'duplex'],
+            ['Penthouse', 'penthouse'],
+            ['Studio', 'studio']
+          ],
             { include_blank: "All Types" },
-            class: "w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" %>
+            class: "w-full border border-gray-300 rounded-xl px-3 py-2.5 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
     </div>
-    
-    <div class="min-w-48">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-      <%= f.search_field :price_gteq, placeholder: "Min Price", class: "w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" %>
-    </div>
-    
+
     <div class="flex gap-2">
-      <%= f.submit "Apply Filters", class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105 shadow-lg cursor-pointer" %>
-      <%= link_to "Clear", request.path, class: "bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all" %>
+      <%= f.submit "Search", class: "flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm cursor-pointer" %>
+      <%= link_to "Clear", request.path, class: "flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all" %>
     </div>
+
   <% end %>
 </div>
 
@@ -126,7 +143,7 @@
           <!-- Property Type Badge -->
           <div class="absolute top-4 left-4">
             <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-gray-800 text-xs font-semibold rounded-full">
-              <%= property.property_type&.titleize || 'Apartment' %>
+              <%= format_property_type(property.property_type) %>
             </span>
           </div>
           
@@ -170,7 +187,7 @@
             </div>
             <div class="text-right">
               <% if property.price.present? && property.price > 0 %>
-                <p class="text-2xl font-bold text-blue-600">₹<%= number_with_delimiter(property.price / 100000) %>L</p>
+                <p class="text-2xl font-bold text-blue-600"><%= format_price(property.price) %></p>
               <% else %>
                 <p class="text-2xl font-bold text-gray-400">Price not set</p>
               <% end %>
@@ -227,6 +244,75 @@
       </div>
     </div>
   <% end %>
+
+  <!-- Pagination -->
+  <% if @pagy && @pagy.pages > 1 %>
+    <div class="mt-10 pt-6 border-t border-gray-200">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+
+        <!-- Left: count info -->
+        <p class="text-sm text-gray-500 order-2 sm:order-1">
+          Showing
+          <span class="font-semibold text-gray-800"><%= @pagy.from %></span>
+          –
+          <span class="font-semibold text-gray-800"><%= @pagy.to %></span>
+          of
+          <span class="font-semibold text-gray-800"><%= @pagy.count %></span>
+          properties
+        </p>
+
+        <!-- Right: page buttons -->
+        <div class="flex items-center gap-1.5 order-1 sm:order-2">
+
+          <%# Prev button %>
+          <% if @pagy.previous %>
+            <% prev_url = @pagy.previous == 1 ? url_for(request.query_parameters.except("page")) : url_for(request.query_parameters.merge("page" => @pagy.previous)) %>
+            <%= link_to prev_url, class: "inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <span class="hidden sm:inline">Prev</span>
+            <% end %>
+          <% else %>
+            <span class="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-300 cursor-not-allowed shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              <span class="hidden sm:inline">Prev</span>
+            </span>
+          <% end %>
+
+          <%# Page number buttons %>
+          <% pagy_series(@pagy).each do |item| %>
+            <% if item == :gap %>
+              <span class="inline-flex items-center justify-center w-9 h-9 text-gray-400 text-sm select-none">…</span>
+            <% elsif item.is_a?(String) %>
+              <%# Current page (Pagy returns current page as String) %>
+              <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-600 text-white text-sm font-bold shadow-md ring-2 ring-blue-200">
+                <%= item %>
+              </span>
+            <% else %>
+              <%# Other page numbers (Integer) %>
+              <% page_url = item == 1 ? url_for(request.query_parameters.except("page")) : url_for(request.query_parameters.merge("page" => item)) %>
+              <%= link_to item, page_url,
+                    class: "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" %>
+            <% end %>
+          <% end %>
+
+          <%# Next button %>
+          <% if @pagy.next %>
+            <% next_url = url_for(request.query_parameters.merge("page" => @pagy.next)) %>
+            <%= link_to next_url, class: "inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" do %>
+              <span class="hidden sm:inline">Next</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <% end %>
+          <% else %>
+            <span class="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-300 cursor-not-allowed shadow-sm">
+              <span class="hidden sm:inline">Next</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </span>
+          <% end %>
+
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>
 <% else %>
 <!-- Empty State -->
@@ -246,4 +332,3 @@
 </div>
 <% end %>
 
-<%== @pagy.series_nav if @pagy.pages > 1 %>
