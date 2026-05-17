@@ -1,0 +1,14 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+  <div class="max-w-3xl mx-auto px-4 py-8">
+
+    <div class="mb-6 flex items-center gap-2 text-sm text-gray-500">
+      <%= link_to "Cost Tracker", property_costs_path, class: "text-blue-600 hover:underline" %>
+      <span>/</span>
+      <span class="text-gray-700 font-medium">New Cost Entry</span>
+    </div>
+
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Add Cost Entry</h1>
+
+    <%= render 'form' %>
+  </div>
+</div>

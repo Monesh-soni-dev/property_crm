@@ -22,6 +22,7 @@ Rails.application.routes.draw do
 
   resources :properties
   resources :interests, only: [:index]
+  resources :property_costs
   resources :leads do
     member { patch :update_stage }
     resources :activities, only: [:create, :destroy]

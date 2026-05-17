@@ -1,0 +1,327 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <span class="text-2xl">📊</span> Property Cost Tracker
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">Track all investment costs across your properties & projects</p>
+      </div>
+      <%= link_to new_property_cost_path,
+          class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Add Cost Entry
+      <% end %>
+    </div>
+
+    <!-- ── FILTER BAR ─────────────────────────────────────────────────── -->
+    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+      <%= form_with url: property_costs_path, method: :get, local: true,
+          class: "flex flex-wrap items-end gap-3" do |f| %>
+
+        <div class="flex-1 min-w-[160px]">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Project</label>
+          <%= f.select :project_id,
+              options_for_select([['All Projects', '']] + @filter_projects.map { |p| [p.name, p.id] }, params[:project_id]),
+              {},
+              class: "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" %>
+        </div>
+
+        <div class="flex-1 min-w-[160px]">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Property</label>
+          <%= f.select :property_id,
+              options_for_select(
+                [['All Properties', '']] +
+                @filter_properties.map { |p| ["#{p.project.name} — #{p.title}", p.id] },
+                params[:property_id]
+              ),
+              {},
+              class: "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" %>
+        </div>
+
+        <div class="min-w-[140px]">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Category</label>
+          <%= f.select :category,
+              options_for_select(
+                [['All Categories', '']] +
+                PropertyCost::CATEGORIES.map { |c| [c.humanize, c] },
+                params[:category]
+              ),
+              {},
+              class: "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" %>
+        </div>
+
+        <div class="flex gap-2">
+          <%= f.submit "Filter",
+              class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium cursor-pointer transition-colors" %>
+          <%= link_to "Clear", property_costs_path,
+              class: "px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Active filter pills -->
+    <% if @filter_property || @filter_project || @filter_category %>
+      <div class="flex flex-wrap gap-2 mb-5">
+        <span class="text-xs text-gray-500 self-center">Filtering by:</span>
+        <% if @filter_project %>
+          <span class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
+            Project: <%= @filter_project.name %>
+          </span>
+        <% end %>
+        <% if @filter_property %>
+          <span class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+            Property: <%= @filter_property.title %>
+          </span>
+        <% end %>
+        <% if @filter_category %>
+          <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
+            Category: <%= @filter_category.humanize %>
+          </span>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- ── SUMMARY CARDS ──────────────────────────────────────────────── -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Total Invested</p>
+        <p class="text-2xl font-bold text-gray-900">₹<%= number_with_delimiter(@total_invested.to_i) %></p>
+        <p class="text-xs text-gray-400 mt-1"><%= @costs.count %> entries</p>
+      </div>
+
+      <% top_cat = @by_category.max_by { |_, v| v }&.first %>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Top Category</p>
+        <p class="text-lg font-bold text-gray-900"><%= top_cat&.humanize || '—' %></p>
+        <p class="text-xs text-gray-400 mt-1">
+          <%= top_cat ? "₹#{number_with_delimiter(@by_category[top_cat].to_i)}" : 'No data yet' %>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Properties Tracked</p>
+        <p class="text-2xl font-bold text-gray-900"><%= @property_summaries.count %></p>
+        <p class="text-xs text-gray-400 mt-1">with cost records</p>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Avg Cost / Entry</p>
+        <% if @costs.any? %>
+          <p class="text-2xl font-bold text-gray-900">
+            ₹<%= number_with_delimiter((@total_invested / @costs.count).to_i) %>
+          </p>
+          <p class="text-xs text-gray-400 mt-1">per entry avg</p>
+        <% else %>
+          <p class="text-xl font-bold text-gray-300">—</p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+
+      <!-- ── CATEGORY BREAKDOWN ─────────────────────────────────────── -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-400 px-5 py-3">
+          <h2 class="text-sm font-bold text-white">Cost by Category</h2>
+        </div>
+        <div class="p-5 space-y-3">
+          <% if @by_category.any? %>
+            <% @by_category.sort_by { |_, v| -v }.each do |cat, amt| %>
+              <% pct = @max_category_amt > 0 ? (amt / @max_category_amt * 100).round : 0 %>
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="font-medium text-gray-700"><%= cat.humanize %></span>
+                  <span class="text-gray-500 font-semibold">₹<%= number_with_delimiter(amt.to_i) %></span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                  <div class="h-2 rounded-full bg-blue-500 transition-all" style="width: <%= pct %>%"></div>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-sm text-gray-400 text-center py-6">No cost data yet.</p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- ── PER-PROPERTY SUMMARY ───────────────────────────────────── -->
+      <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-teal-600 to-teal-400 px-5 py-3">
+          <h2 class="text-sm font-bold text-white">Cost vs. Sale Price — Per Property</h2>
+        </div>
+        <% if @property_summaries.any? %>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th class="text-left text-xs text-gray-500 font-semibold px-5 py-3">Property</th>
+                  <th class="text-right text-xs text-gray-500 font-semibold px-4 py-3">Total Cost</th>
+                  <th class="text-right text-xs text-gray-500 font-semibold px-5 py-3">Entries</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-50">
+                <% @property_summaries.each do |prop, cost_total| %>
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3">
+                      <p class="font-medium text-gray-800 text-xs">
+                        <%= link_to prop.title, project_property_path(prop.project, prop),
+                            class: "hover:text-blue-600 hover:underline" %>
+                      </p>
+                      <p class="text-xs text-gray-400"><%= prop.project.name %> &bull; Unit <%= prop.unit_number %></p>
+                    </td>
+                    <td class="px-4 py-3 text-right font-semibold text-gray-900 text-xs">
+                      ₹<%= number_with_delimiter(cost_total.to_i) %>
+                    </td>
+                    <td class="px-5 py-3 text-right text-xs text-gray-500">
+                      <%= policy_scope(PropertyCost).where(property_id: prop.id).count %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+            <svg class="w-10 h-10 mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            <p class="text-sm">Link cost entries to properties to see cost breakdown by property.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- ── COST ENTRIES TABLE ─────────────────────────────────────────── -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="bg-gradient-to-r from-gray-700 to-gray-500 px-5 py-3 flex items-center justify-between">
+        <h2 class="text-sm font-bold text-white">All Cost Entries</h2>
+        <span class="text-xs text-gray-300"><%= @costs.count %> records</span>
+      </div>
+
+      <% if @costs.any? %>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th class="text-left text-xs text-gray-500 font-semibold px-5 py-3">Title / Vendor</th>
+                <th class="text-left text-xs text-gray-500 font-semibold px-4 py-3">Category</th>
+                <th class="text-left text-xs text-gray-500 font-semibold px-4 py-3">Property / Project</th>
+                <th class="text-left text-xs text-gray-500 font-semibold px-4 py-3">Date</th>
+                <th class="text-right text-xs text-gray-500 font-semibold px-5 py-3">Amount</th>
+                <th class="px-4 py-3 text-center text-xs text-gray-500 font-semibold">Doc</th>
+                <th class="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <% @costs.each do |cost| %>
+                <tr class="hover:bg-gray-50 transition-colors group">
+                  <td class="px-5 py-3">
+                    <p class="font-semibold text-gray-800 text-xs"><%= cost.title %></p>
+                    <% if cost.vendor_name.present? %>
+                      <p class="text-xs text-gray-400"><%= cost.vendor_name %></p>
+                    <% end %>
+                    <% if cost.invoice_number.present? %>
+                      <p class="text-xs text-gray-300">Inv: <%= cost.invoice_number %></p>
+                    <% end %>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
+                      <%= cost.category.humanize %>
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-xs">
+                    <% if cost.property %>
+                      <p class="font-medium text-gray-700">
+                        <%= link_to cost.property.title,
+                            project_property_path(cost.property.project, cost.property),
+                            class: "hover:text-blue-600 hover:underline" %>
+                      </p>
+                      <p class="text-gray-400"><%= cost.property.project.name %></p>
+                    <% elsif cost.project %>
+                      <p class="text-gray-600"><%= cost.project.name %></p>
+                      <p class="text-gray-400 text-[10px]">Project-level cost</p>
+                    <% else %>
+                      <span class="text-gray-300">Unlinked</span>
+                    <% end %>
+                  </td>
+                  <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+                    <%= cost.cost_date.strftime('%d %b %Y') %>
+                  </td>
+                  <td class="px-5 py-3 text-right font-bold text-gray-900 text-sm">
+                    ₹<%= number_with_delimiter(cost.amount.to_i) %>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <% if cost.invoice.attached? %>
+                      <%= link_to rails_blob_path(cost.invoice, disposition: 'attachment'),
+                          class: "text-blue-400 hover:text-blue-600 transition-colors",
+                          title: "Download invoice" do %>
+                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                      <% end %>
+                    <% else %>
+                      <span class="text-gray-200">—</span>
+                    <% end %>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <%= link_to edit_property_cost_path(cost),
+                          class: "p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 transition-colors",
+                          title: "Edit" do %>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                      <% end %>
+                      <%= button_to property_cost_path(cost),
+                          method: :delete,
+                          data: { turbo_confirm: "Delete '#{cost.title}'?" },
+                          class: "p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 transition-colors" do %>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+                <% if cost.notes.present? %>
+                  <tr class="bg-gray-50/60">
+                    <td colspan="7" class="px-5 pb-2 pt-0 text-xs text-gray-400 italic">
+                      ↳ <%= cost.notes %>
+                    </td>
+                  </tr>
+                <% end %>
+              <% end %>
+            </tbody>
+            <tfoot class="border-t-2 border-gray-200 bg-gray-50">
+              <tr>
+                <td colspan="4" class="px-5 py-3 text-xs font-bold text-gray-700 uppercase">Total</td>
+                <td class="px-5 py-3 text-right font-bold text-gray-900">
+                  ₹<%= number_with_delimiter(@total_invested.to_i) %>
+                </td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      <% else %>
+        <div class="flex flex-col items-center justify-center py-16 text-gray-400">
+          <svg class="w-14 h-14 mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          <p class="text-base font-medium text-gray-500 mb-1">No cost entries yet</p>
+          <p class="text-sm text-gray-400 mb-5">Start tracking your property investment costs.</p>
+          <%= link_to new_property_cost_path,
+              class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors" do %>
+            + Add First Cost Entry
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>
