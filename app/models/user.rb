@@ -2,7 +2,28 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         :recoverable, :rememberable, :validatable,
+         :omniauthable, omniauth_providers: [:google_oauth2]
+
+  def self.from_omniauth(auth)
+    # Look up by provider/uid first, then fall back to email
+    user = where(provider: auth.provider, uid: auth.uid).first
+    user ||= where(email: auth.info.email).first
+
+    unless user
+      user = new(
+        email:      auth.info.email,
+        first_name: auth.info.first_name || auth.info.name&.split(' ')&.first || 'User',
+        last_name:  auth.info.last_name  || auth.info.name&.split(' ')&.last  || 'User',
+        password:   Devise.friendly_token[0, 20],
+        role:       'customer'
+      )
+    end
+
+    user.provider = auth.provider
+    user.uid      = auth.uid
+    user
+  end
 
   # Active Storage attachment for profile photo
   has_one_attached :photo
@@ -83,14 +104,35 @@ class User < ApplicationRecord
     end
   end
 
+  # ── Phone OTP helpers ────────────────────────────────────────────────────────
+  public
+
+  def generate_otp!
+    self.otp_code    = SecureRandom.random_number(100_000..999_999).to_s
+    self.otp_sent_at = Time.current
+    save!(validate: false)
+  end
+
+  def verify_otp?(code)
+    return false if otp_code.blank? || otp_sent_at.blank?
+    return false if otp_sent_at < 10.minutes.ago
+
+    otp_code == code.to_s.strip
+  end
+
+  def clear_otp!
+    update_columns(otp_code: nil, otp_sent_at: nil)
+  end
+
   # Validations
   validates :email, presence: true, uniqueness: true
   validates :first_name, presence: true, length: { minimum: 2 }
-  validates :last_name, presence: true, length: { minimum: 2 }
+  validates :last_name, length: { minimum: 2 }, allow_blank: true
   validates :role, presence: { message: "must be selected" }, inclusion: { in: roles.keys }
   
   # Profile validations
-  validates :mobile_number, presence: true, format: { with: /\A[6-9]\d{9}\z/, message: "must be a valid 10-digit mobile number" }
+  validates :mobile_number, presence: true, format: { with: /\A[6-9]\d{9}\z/, message: "must be a valid 10-digit mobile number" },
+            unless: -> { provider.present? }
   validates :city, length: { maximum: 50 }
   validates :state, length: { maximum: 50 }
   validates :address, length: { maximum: 200 }

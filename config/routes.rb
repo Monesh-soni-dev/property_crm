@@ -3,8 +3,15 @@ Rails.application.routes.draw do
   mount ActiveStorage::Engine => "/rails/active_storage"
 
   devise_for :users, controllers: {
-    registrations: 'users/registrations'
+    registrations:      'users/registrations',
+    omniauth_callbacks: 'users/omniauth_callbacks'
   }
+
+  # Phone OTP login
+  get  '/phone_login',        to: 'phone_otp#new',    as: :phone_login
+  post '/phone_login',        to: 'phone_otp#create'
+  get  '/phone_login/verify', to: 'phone_otp#verify', as: :verify_phone_otp
+  post '/phone_login/verify', to: 'phone_otp#check'
   root 'properties#index'
   get '/dashboard', to: 'dashboard#index'
 
