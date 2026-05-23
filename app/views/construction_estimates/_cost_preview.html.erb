@@ -1,0 +1,50 @@
+<div class="bg-white rounded-2xl border border-slate-200 p-6">
+  <h3 class="text-lg font-semibold text-slate-900 mb-4">Cost Preview</h3>
+
+  <% if local_assigns[:result] && result.success? %>
+    <div class="space-y-4">
+      <div class="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+        <p class="text-xs text-slate-500 uppercase tracking-wide">Estimated Total</p>
+        <p class="text-2xl font-bold text-blue-700 mt-1"><%= number_to_indian_currency(result.grand_total) %></p>
+        <p class="text-sm text-slate-500 mt-1">₹<%= number_with_delimiter(result.cost_per_sqft.to_i) %> / sqft</p>
+      </div>
+
+      <div class="space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-slate-500">Materials</span>
+          <span class="font-medium text-slate-700"><%= number_to_indian_currency(result.material_total) %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-slate-500">Labor (<%= result.labor_percentage %>%)</span>
+          <span class="font-medium text-slate-700"><%= number_to_indian_currency(result.labor_cost) %></span>
+        </div>
+        <div class="flex justify-between text-sm">
+          <span class="text-slate-500">Contingency (10%)</span>
+          <span class="font-medium text-slate-700"><%= number_to_indian_currency(result.contingency) %></span>
+        </div>
+        <hr class="border-slate-200">
+        <div class="flex justify-between text-sm font-semibold">
+          <span class="text-slate-900">Grand Total</span>
+          <span class="text-blue-700"><%= number_to_indian_currency(result.grand_total) %></span>
+        </div>
+      </div>
+
+      <!-- Cost Distribution Bar -->
+      <div class="mt-4">
+        <p class="text-xs text-slate-500 mb-2">Cost Distribution</p>
+        <div class="flex h-3 rounded-full overflow-hidden">
+          <div class="bg-blue-500" style="width: <%= cost_percentage(result.material_total, result.grand_total) %>%" title="Materials"></div>
+          <div class="bg-emerald-500" style="width: <%= cost_percentage(result.labor_cost, result.grand_total) %>%" title="Labor"></div>
+          <div class="bg-amber-500" style="width: <%= cost_percentage(result.contingency, result.grand_total) %>%" title="Contingency"></div>
+        </div>
+        <div class="flex gap-3 mt-2 text-xs text-slate-500">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span>Materials</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Labor</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Contingency</span>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <p class="text-sm text-slate-400 text-center py-4">Fill in the form to see cost estimate</p>
+  <% end %>
+</div>

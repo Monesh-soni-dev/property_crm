@@ -1,0 +1,5 @@
+<%= turbo_stream.replace "cost_preview" do %>
+  <div id="cost_preview">
+    <%= render partial: "construction_estimates/cost_preview", locals: { result: @result } %>
+  </div>
+<% end %>

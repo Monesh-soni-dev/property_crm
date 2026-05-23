@@ -1,0 +1,112 @@
+<%= form_with(model: estimate, html: { data: { controller: "cost-calculator", action: "change->cost-calculator#calculate" } }, class: "space-y-6") do |f| %>
+  <% if estimate.errors.any? %>
+    <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4">
+      <h3 class="font-medium text-sm mb-2"><%= pluralize(estimate.errors.count, "error") %> prevented saving:</h3>
+      <ul class="list-disc pl-5 text-sm space-y-1">
+        <% estimate.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Form Inputs -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Plot Dimensions -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6">
+        <h2 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+          Plot Dimensions
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Length (ft)</label>
+            <%= f.number_field :plot_length, step: 0.01, min: 1, class: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "e.g. 40", data: { cost_calculator_target: "plotLength" } %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Width (ft)</label>
+            <%= f.number_field :plot_width, step: 0.01, min: 1, class: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "e.g. 30", data: { cost_calculator_target: "plotWidth" } %>
+          </div>
+        </div>
+        <div class="mt-3 p-3 bg-slate-50 rounded-lg">
+          <p class="text-sm text-slate-600">
+            Plot Area: <span class="font-semibold text-slate-900" data-cost-calculator-target="plotArea">0</span> sqft
+            <span class="text-xs text-slate-400 ml-2">(min 600 sqft)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Construction Details -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6">
+        <h2 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Construction Details
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Construction Area (sqft)</label>
+            <%= f.number_field :construction_area, step: 0.01, min: 1, class: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500", placeholder: "e.g. 1200", data: { cost_calculator_target: "constructionArea" } %>
+            <p class="text-xs text-slate-400 mt-1">Max allowed: <span data-cost-calculator-target="maxArea">-</span> sqft</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Number of Floors</label>
+            <%= f.select :number_of_floors, (1..5).map { |n| [n, n] }, {}, class: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500", data: { cost_calculator_target: "floors" } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location & Quality -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6">
+        <h2 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Location & Quality
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">City</label>
+            <%= f.select :city, @cities.map { |c| [c, c] }, { include_blank: "Select City" }, class: "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500", data: { cost_calculator_target: "city" } %>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Quality Tier</label>
+            <div class="flex gap-3">
+              <% ConstructionEstimate.quality_tiers.keys.each do |tier| %>
+                <label class="flex-1 cursor-pointer">
+                  <%= f.radio_button :quality_tier, tier, class: "peer sr-only", data: { cost_calculator_target: "qualityTier" } %>
+                  <div class="peer-checked:ring-2 peer-checked:ring-blue-500 peer-checked:bg-blue-50 peer-checked:border-blue-300 border border-slate-200 rounded-lg p-3 text-center transition hover:bg-slate-50">
+                    <p class="text-sm font-medium text-slate-700"><%= tier.capitalize %></p>
+                  </div>
+                </label>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plot Visualizer -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6" data-controller="plot-visualizer" data-plot-visualizer-length-value="<%= estimate.plot_length || 0 %>" data-plot-visualizer-width-value="<%= estimate.plot_width || 0 %>" data-plot-visualizer-construction-area-value="<%= estimate.construction_area || 0 %>">
+        <h2 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Plot Visualization
+        </h2>
+        <div data-plot-visualizer-target="canvas" class="w-full bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center" style="min-height: 250px;">
+          <p class="text-sm text-slate-400">Enter plot dimensions to see visualization</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Cost Preview -->
+    <div class="lg:col-span-1">
+      <div class="sticky top-6 space-y-4">
+        <div id="cost_preview" data-cost-calculator-target="preview">
+          <%= render partial: "construction_estimates/cost_preview_empty" %>
+        </div>
+
+        <div class="flex gap-3">
+          <%= f.submit estimate.persisted? ? "Update Estimate" : "Create Estimate", class: "flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition shadow-sm cursor-pointer" %>
+          <%= link_to "Cancel", construction_estimates_path, class: "px-4 py-2.5 bg-white text-slate-700 text-sm font-medium rounded-xl border border-slate-200 hover:bg-slate-50 transition" %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

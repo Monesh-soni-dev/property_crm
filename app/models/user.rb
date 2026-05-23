@@ -44,6 +44,7 @@ class User < ApplicationRecord
   has_many :projects, dependent: :destroy
   has_many :properties, dependent: :destroy
   has_many :leads, dependent: :destroy
+  has_many :construction_estimates, dependent: :destroy
 
   # Methods
   def full_name
