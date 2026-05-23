@@ -3,7 +3,7 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: [:show, :edit, :update, :destroy]
 
   def index
-    @projects = Project.all.includes(:user, :properties)
+    @projects = policy_scope(Project).includes(:user, :properties)
     @total_projects = @projects.count
     @active_projects = @projects.where(status: 'active').count
     authorize Project

@@ -4,7 +4,7 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def show?
-    user.present? && (user.admin? || user.builder?)
+    record_owner_or_admin?
   end
 
   def create?
@@ -12,20 +12,29 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def update?
-    user.present? && (user.admin? || user.builder?)
+    record_owner_or_admin?
   end
 
   def destroy?
-    user.present? && (user.admin? || user.builder?)
+    record_owner_or_admin?
   end
 
   class Scope < Scope
     def resolve
-      if user&.admin? || user&.builder?
-        scope.all
-      else
-        scope.none
-      end
+      return scope.all if user&.admin?
+      return scope.where(user_id: user.id) if user&.builder?
+
+      scope.none
     end
+  end
+
+  private
+
+  def user_is_owner_or_admin?
+    user&.admin? || (user&.builder? && record.user_id == user.id)
+  end
+
+  def record_owner_or_admin?
+    user_is_owner_or_admin?
   end
 end

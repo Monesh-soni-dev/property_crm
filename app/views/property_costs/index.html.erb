@@ -9,18 +9,12 @@
         </h1>
         <p class="text-gray-500 text-sm mt-1">Track all investment costs across your properties & projects</p>
       </div>
-      <%= link_to new_property_cost_path,
-          class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all" do %>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-        </svg>
-        Add Cost Entry
-      <% end %>
+      <%= link_to "Add Cost Entry", new_property_cost_path, class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all" %>
     </div>
 
     <!-- ── FILTER BAR ─────────────────────────────────────────────────── -->
     <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-      <%= form_with url: property_costs_path, method: :get, local: true,
+      <% form_with url: property_costs_path, method: :get, local: true,
           class: "flex flex-wrap items-end gap-3" do |f| %>
 
         <div class="flex-1 min-w-[160px]">
@@ -40,6 +34,14 @@
                 params[:property_id]
               ),
               {},
+              class: "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" %>
+        </div>
+
+        <div class="flex-1 min-w-[220px]">
+          <label class="block text-xs font-semibold text-gray-500 mb-1">Search by Title</label>
+          <%= f.text_field :query,
+              value: params[:query],
+              placeholder: "Search cost title...",
               class: "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" %>
         </div>
 
@@ -65,7 +67,7 @@
     </div>
 
     <!-- Active filter pills -->
-    <% if @filter_property || @filter_project || @filter_category %>
+    <% if @filter_property || @filter_project || @filter_category || @filter_query %>
       <div class="flex flex-wrap gap-2 mb-5">
         <span class="text-xs text-gray-500 self-center">Filtering by:</span>
         <% if @filter_project %>
@@ -81,6 +83,11 @@
         <% if @filter_category %>
           <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
             Category: <%= @filter_category.humanize %>
+          </span>
+        <% end %>
+        <% if @filter_query %>
+          <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+            Title: <%= @filter_query %>
           </span>
         <% end %>
       </div>
@@ -199,115 +206,231 @@
     <!-- ── COST ENTRIES TABLE ─────────────────────────────────────────── -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div class="bg-gradient-to-r from-gray-700 to-gray-500 px-5 py-3 flex items-center justify-between">
-        <h2 class="text-sm font-bold text-white">All Cost Entries</h2>
-        <span class="text-xs text-gray-300"><%= @costs.count %> records</span>
+        <h2 class="text-sm font-bold text-white">Cost Entries</h2>
+        <span class="text-xs text-gray-300"><%= @pagy ? @pagy.count : @main_costs.count %> entries</span>
       </div>
 
-      <% if @costs.any? %>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th class="text-left text-xs text-gray-500 font-semibold px-5 py-3">Title / Vendor</th>
-                <th class="text-left text-xs text-gray-500 font-semibold px-4 py-3">Category</th>
-                <th class="text-left text-xs text-gray-500 font-semibold px-4 py-3">Property / Project</th>
-                <th class="text-left text-xs text-gray-500 font-semibold px-4 py-3">Date</th>
-                <th class="text-right text-xs text-gray-500 font-semibold px-5 py-3">Amount</th>
-                <th class="px-4 py-3 text-center text-xs text-gray-500 font-semibold">Doc</th>
-                <th class="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50">
-              <% @costs.each do |cost| %>
-                <tr class="hover:bg-gray-50 transition-colors group">
-                  <td class="px-5 py-3">
-                    <p class="font-semibold text-gray-800 text-xs"><%= cost.title %></p>
-                    <% if cost.vendor_name.present? %>
-                      <p class="text-xs text-gray-400"><%= cost.vendor_name %></p>
-                    <% end %>
-                    <% if cost.invoice_number.present? %>
-                      <p class="text-xs text-gray-300">Inv: <%= cost.invoice_number %></p>
-                    <% end %>
-                  </td>
-                  <td class="px-4 py-3">
-                    <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
-                      <%= cost.category.humanize %>
-                    </span>
-                  </td>
-                  <td class="px-4 py-3 text-xs">
-                    <% if cost.property %>
-                      <p class="font-medium text-gray-700">
-                        <%= link_to cost.property.title,
-                            project_property_path(cost.property.project, cost.property),
-                            class: "hover:text-blue-600 hover:underline" %>
+      <% if @main_costs.any? %>
+        <div class="divide-y divide-gray-100">
+          <!-- Table headers for cost list -->
+          <div class="px-6 py-3 bg-gray-50 text-xs text-gray-500 uppercase font-semibold">
+            <div class="flex items-center justify-between">
+              <div class="flex-1 min-w-0">
+                Cost / Property
+              </div>
+              <div class="flex items-center gap-4 flex-shrink-0 text-right">
+                <div class="w-40 text-right">Category • Date</div>
+                <div class="w-32 text-right">Amount</div>
+                <div class="w-28 text-right">Actions</div>
+              </div>
+            </div>
+          </div>
+          <% @main_costs.each_with_index do |cost, index| %>
+            <div class="px-6 py-3 transition-colors cursor-pointer group <%= index.even? ? 'bg-white' : 'bg-slate-100' %> hover:bg-blue-50" data-cost-modal-url="<%= property_cost_path(cost, modal: true) %>">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-3">
+                    <div>
+                      <p class="font-medium text-gray-900 text-sm truncate"><%= cost.title %></p>
+                      <p class="text-xs text-gray-500 mt-0.5">
+                        <% if cost.property %>
+                          <%= cost.property.title %> • <%= cost.property.project.name %>
+                        <% elsif cost.project %>
+                          <%= cost.project.name %>
+                        <% else %>
+                          Standalone
+                        <% end %>
                       </p>
-                      <p class="text-gray-400"><%= cost.property.project.name %></p>
-                    <% elsif cost.project %>
-                      <p class="text-gray-600"><%= cost.project.name %></p>
-                      <p class="text-gray-400 text-[10px]">Project-level cost</p>
-                    <% else %>
-                      <span class="text-gray-300">Unlinked</span>
-                    <% end %>
-                  </td>
-                  <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
-                    <%= cost.cost_date.strftime('%d %b %Y') %>
-                  </td>
-                  <td class="px-5 py-3 text-right font-bold text-gray-900 text-sm">
-                    ₹<%= number_with_delimiter(cost.amount.to_i) %>
-                  </td>
-                  <td class="px-4 py-3 text-center">
-                    <% if cost.invoice.attached? %>
-                      <%= link_to rails_blob_path(cost.invoice, disposition: 'attachment'),
-                          class: "text-blue-400 hover:text-blue-600 transition-colors",
-                          title: "Download invoice" do %>
-                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                        </svg>
-                      <% end %>
-                    <% else %>
-                      <span class="text-gray-200">—</span>
-                    <% end %>
-                  </td>
-                  <td class="px-4 py-3">
-                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <%= link_to edit_property_cost_path(cost),
-                          class: "p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 transition-colors",
-                          title: "Edit" do %>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                      <% end %>
-                      <%= button_to property_cost_path(cost),
-                          method: :delete,
-                          data: { turbo_confirm: "Delete '#{cost.title}'?" },
-                          class: "p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 transition-colors" do %>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                      <% end %>
                     </div>
-                  </td>
-                </tr>
-                <% if cost.notes.present? %>
-                  <tr class="bg-gray-50/60">
-                    <td colspan="7" class="px-5 pb-2 pt-0 text-xs text-gray-400 italic">
-                      ↳ <%= cost.notes %>
-                    </td>
-                  </tr>
-                <% end %>
-              <% end %>
-            </tbody>
-            <tfoot class="border-t-2 border-gray-200 bg-gray-50">
-              <tr>
-                <td colspan="4" class="px-5 py-3 text-xs font-bold text-gray-700 uppercase">Total</td>
-                <td class="px-5 py-3 text-right font-bold text-gray-900">
-                  ₹<%= number_with_delimiter(@total_invested.to_i) %>
-                </td>
-                <td colspan="2"></td>
-              </tr>
-            </tfoot>
-          </table>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
+                    <%= cost.category.humanize %>
+                  </span>
+                  <% if cost.sub_costs.any? %>
+                    <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-orange-50 text-orange-700">
+                      +<%= cost.sub_costs.count %>
+                    </span>
+                  <% end %>
+                  <span class="text-xs text-gray-500"><%= cost.cost_date.strftime('%d %b %Y') %></span>
+                </div>
+
+                <div class="text-right flex-shrink-0 min-w-[120px]">
+                  <p class="font-semibold text-gray-900">₹<%= number_with_delimiter(cost.total_amount.to_i) %></p>
+                  <% if cost.sub_costs.any? %>
+                    <p class="text-xs text-gray-500">+<%= cost.sub_costs.count %> sub</p>
+                  <% end %>
+                </div>
+
+                <div class="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation();">
+                  <% if cost.invoice.attached? %>
+                      <a href="<%= rails_blob_path(cost.invoice, disposition: 'attachment') %>"
+                        data-turbo="false"
+                        target="_blank"
+                        download
+                        class="p-1.5 rounded-lg bg-transparent hover:bg-slate-100 text-slate-500 transition-colors"
+                        title="Download invoice">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                      </svg>
+                    </a>
+                  <% end %>
+                  <a href="<%= edit_property_cost_path(cost) %>"
+                    class="p-1.5 rounded-lg bg-transparent hover:bg-blue-50 text-blue-500 transition-colors"
+                    title="Edit">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </a>
+                  <form action="<%= property_cost_path(cost) %>" method="post" class="inline-block">
+                    <input type="hidden" name="_method" value="delete" />
+                    <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>" />
+                    <button type="submit" data-turbo-confirm="Delete '<%= cost.title %>' and its <%= cost.sub_costs.count %> sub-costs?" class="p-1.5 rounded-lg bg-transparent hover:bg-red-50 text-red-400 transition-colors" title="Delete">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% end %>
         </div>
+
+        <!-- Total Summary -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Total Investment</p>
+            <p class="text-2xl font-bold text-gray-900 mt-1">₹<%= number_with_delimiter(@total_invested.to_i) %></p>
+          </div>
+          <div class="text-right text-sm text-gray-600">
+            <p><%= @main_cost_count %> costs • <%= @sub_cost_count %> sub-costs</p>
+          </div>
+        </div>
+
+        <% if @pagy && @pagy.pages > 1 %>
+          <div class="px-6 py-4 border-t border-gray-100 bg-white">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p class="text-sm text-gray-500 order-2 sm:order-1">
+                Showing
+                <span class="font-semibold text-gray-800"><%= @pagy.from %></span>
+                –
+                <span class="font-semibold text-gray-800"><%= @pagy.to %></span>
+                of
+                <span class="font-semibold text-gray-800"><%= @pagy.count %></span>
+                costs
+              </p>
+              <div class="flex items-center gap-1.5 order-1 sm:order-2">
+                <% if @pagy.previous %>
+                  <% prev_url = @pagy.previous == 1 ? url_for(request.query_parameters.except("page")) : url_for(request.query_parameters.merge("page" => @pagy.previous)) %>
+                  <%= link_to prev_url, class: "inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" do %>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    <span class="hidden sm:inline">Prev</span>
+                  <% end %>
+                <% else %>
+                  <span class="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-300 cursor-not-allowed shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    <span class="hidden sm:inline">Prev</span>
+                  </span>
+                <% end %>
+
+                <% pagy_series(@pagy).each do |item| %>
+                  <% if item == :gap %>
+                    <span class="inline-flex items-center justify-center w-9 h-9 text-gray-400 text-sm select-none">…</span>
+                  <% elsif item.is_a?(String) %>
+                    <span class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-600 text-white text-sm font-bold shadow-md ring-2 ring-blue-200"><%= item %></span>
+                  <% else %>
+                    <% page_url = item == 1 ? url_for(request.query_parameters.except("page")) : url_for(request.query_parameters.merge("page" => item)) %>
+                    <%= link_to item, page_url, class: "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" %>
+                  <% end %>
+                <% end %>
+
+                <% if @pagy.next %>
+                  <% next_url = url_for(request.query_parameters.merge("page" => @pagy.next)) %>
+                  <%= link_to next_url, class: "inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-colors shadow-sm" do %>
+                    <span class="hidden sm:inline">Next</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  <% end %>
+                <% else %>
+                  <span class="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg border border-gray-200 bg-gray-50 text-sm font-medium text-gray-300 cursor-not-allowed shadow-sm">
+                    <span class="hidden sm:inline">Next</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  </span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div id="cost-detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-black/50 p-4">
+          <div class="w-full max-w-3xl rounded-3xl bg-white shadow-2xl ring-1 ring-black/5">
+            <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900">Cost details</h2>
+                <p class="text-sm text-gray-500">Full cost and sub-cost details for the selected entry.</p>
+              </div>
+              <button id="close-cost-modal" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200">
+                <span class="sr-only">Close</span>
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+            <div id="cost-modal-content" class="max-h-[80vh] overflow-y-auto px-6 py-5"></div>
+          </div>
+        </div>
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('cost-detail-modal');
+            const modalContent = document.getElementById('cost-modal-content');
+            const closeModalButton = document.getElementById('close-cost-modal');
+
+            function closeModal() {
+              modal.classList.add('hidden');
+              modal.classList.remove('flex');
+              modalContent.innerHTML = '';
+            }
+
+            function openModalWithUrl(url) {
+              if (!url) return;
+              modalContent.innerHTML = '<div class="py-16 text-center text-sm text-gray-500">Loading details...</div>';
+              modal.classList.remove('hidden');
+              modal.classList.add('flex');
+
+              fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => {
+                  if (!response.ok) throw new Error('Failed to load cost details');
+                  return response.text();
+                })
+                .then(html => {
+                  modalContent.innerHTML = html;
+                })
+                .catch(error => {
+                  modalContent.innerHTML = '<div class="py-16 text-center text-sm text-red-500">Unable to load details. Refresh the page and try again.</div>';
+                });
+            }
+
+            // Hook row clicks to open modal
+            document.querySelectorAll('[data-cost-modal-url]').forEach(function(row) {
+              row.addEventListener('click', function(e) {
+                // Don't open modal if clicking buttons/forms
+                if (e.target.closest('a, button, form')) return;
+                const url = row.getAttribute('data-cost-modal-url');
+                openModalWithUrl(url);
+              });
+            });
+
+            closeModalButton.addEventListener('click', closeModal);
+            modal.addEventListener('click', function(event) {
+              if (event.target === modal) {
+                closeModal();
+              }
+            });
+          });
+        </script>
       <% else %>
         <div class="flex flex-col items-center justify-center py-16 text-gray-400">
           <svg class="w-14 h-14 mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,10 +438,7 @@
           </svg>
           <p class="text-base font-medium text-gray-500 mb-1">No cost entries yet</p>
           <p class="text-sm text-gray-400 mb-5">Start tracking your property investment costs.</p>
-          <%= link_to new_property_cost_path,
-              class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors" do %>
-            + Add First Cost Entry
-          <% end %>
+          <%= link_to "+ Add First Cost Entry", new_property_cost_path, class: "inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-colors" %>
         </div>
       <% end %>
     </div>

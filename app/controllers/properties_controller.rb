@@ -5,9 +5,16 @@ class PropertiesController < ApplicationController
   before_action :set_property, only: [:show, :edit, :update, :destroy]
 
   def index
-    # Public listing - show all properties to everyone except sold ones
-    @properties = Property.includes(:project).where.not(status: 'sold')
-    authorize Property
+    # Root page should show all public properties. The signed-in user's dashboard (/properties)
+    # shows only their own properties via policy scope.
+    if request.path == root_path || request.path == '/'
+      @properties = Property.includes(:project).where.not(status: 'sold')
+    elsif user_signed_in?
+      @properties = policy_scope(Property).includes(:project).where.not(status: 'sold')
+      authorize Property
+    else
+      @properties = Property.includes(:project).where.not(status: 'sold')
+    end
     
     # Handle search if ransack is available
     if defined?(Ransack)
@@ -55,7 +62,8 @@ class PropertiesController < ApplicationController
 
   def show
     authorize @property
-    # @property is already set by set_property before_action
+    @property_costs = policy_scope(PropertyCost).where(property_id: @property.id).order(cost_date: :desc)
+    @property_total_cost = @property_costs.sum(:amount)
   end
 
   def edit
