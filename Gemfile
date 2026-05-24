@@ -84,6 +84,8 @@ gem 'hotwire-rails'   # Turbo + Stimulus
 # Background jobs
 gem 'sidekiq'
 gem 'redis'
+gem 'prawn'
+gem 'prawn-table'
 
 # Dev/test
 group :development, :test do

@@ -1,0 +1,91 @@
+<% grouped_items = if calculation.present? && calculation[:materials].present?
+  calculation[:materials].group_by { |line| line[:category_name] }
+else
+  estimate.estimate_materials.includes(material: :material_category).group_by { |item| item.material.material_category&.name || 'Other' }
+end %>
+
+<div class="space-y-4" data-controller="material-breakdown">
+  <% if grouped_items.blank? %>
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center text-sm text-slate-600">
+      Enter dimensions to generate the material breakdown.
+    </div>
+  <% end %>
+
+  <% grouped_items.each_with_index do |(category_name, items), index| %>
+    <% category_total = items.sum { |item| calculation.present? ? item[:total_price].to_f : item.total_price.to_f } %>
+    <section class="overflow-hidden rounded-3xl border border-slate-200">
+      <button type="button" class="flex w-full items-center justify-between bg-slate-50 px-5 py-4 text-left transition hover:bg-sky-50/70" data-action="material-breakdown#toggle">
+        <div>
+          <p class="text-sm font-semibold text-slate-900"><%= category_name %></p>
+          <p class="text-xs text-slate-600"><%= pluralize(items.size, 'line item') %></p>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-sm font-semibold text-slate-900"><%= number_to_currency(category_total, unit: '₹') %></span>
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700">+</span>
+        </div>
+      </button>
+
+      <div class="<%= index.zero? ? '' : 'hidden' %> bg-white" data-material-breakdown-target="panel">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-sm text-slate-700">
+            <thead class="bg-white text-xs uppercase tracking-[0.2em] text-slate-500">
+              <tr>
+                <th class="px-5 py-3 text-left">Material</th>
+                <th class="px-5 py-3 text-right">Quantity</th>
+                <th class="px-5 py-3 text-right">Rate</th>
+                <th class="px-5 py-3 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <% items.each do |item| %>
+                <% material_name = calculation.present? ? item[:material_name] : item.material.name %>
+                <% unit = calculation.present? ? item[:unit] : item.material.unit %>
+                <% quantity = calculation.present? ? item[:quantity].to_f : item.quantity.to_f %>
+                <% unit_price = calculation.present? ? item[:unit_price].to_f : item.unit_price.to_f %>
+                <% total_price = calculation.present? ? item[:total_price].to_f : item.total_price.to_f %>
+                <% formula = calculation.present? ? item[:calculation_formula] : item.calculation_formula %>
+                <tr>
+                  <td class="px-5 py-4 align-top">
+                    <p class="font-medium text-slate-900"><%= material_name %></p>
+                    <p class="mt-1 text-xs text-slate-600"><%= formula %></p>
+                  </td>
+                  <td class="px-5 py-4 text-right"><%= quantity.round(2) %> <%= unit %></td>
+                  <td class="px-5 py-4 text-right"><%= number_to_currency(unit_price, unit: '₹') %></td>
+                  <td class="px-5 py-4 text-right font-semibold text-slate-900"><%= number_to_currency(total_price, unit: '₹') %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  <% end %>
+
+  <% summary = calculation.present? ? calculation[:summary] : estimate.latest_snapshot.fetch('summary', {}) %>
+  <% if summary.present? %>
+    <section class="rounded-3xl bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_42%),linear-gradient(135deg,#0f172a,#1e3a8a)] p-5 text-white">
+      <div class="grid gap-4 md:grid-cols-5">
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-100/75">Materials</p>
+          <p class="mt-2 text-lg font-semibold"><%= number_to_currency(summary[:material_subtotal] || summary['material_subtotal'], unit: '₹') %></p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-100/75">Labor</p>
+          <p class="mt-2 text-lg font-semibold"><%= number_to_currency(summary[:labor_cost] || summary['labor_cost'], unit: '₹') %></p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-100/75">Overhead</p>
+          <p class="mt-2 text-lg font-semibold"><%= number_to_currency(summary[:overhead_cost] || summary['overhead_cost'], unit: '₹') %></p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-100/75">Contingency</p>
+          <p class="mt-2 text-lg font-semibold"><%= number_to_currency(summary[:contingency_cost] || summary['contingency_cost'], unit: '₹') %></p>
+        </div>
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-slate-100/75">Grand Total</p>
+          <p class="mt-2 text-lg font-semibold"><%= number_to_currency(summary[:grand_total] || summary['grand_total'], unit: '₹') %></p>
+        </div>
+      </div>
+    </section>
+  <% end %>
+</div>

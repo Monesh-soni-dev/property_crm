@@ -44,6 +44,7 @@ class User < ApplicationRecord
   has_many :projects, dependent: :destroy
   has_many :properties, dependent: :destroy
   has_many :leads, dependent: :destroy
+  has_many :construction_estimates, dependent: :destroy
 
   # Methods
   def full_name
@@ -87,12 +88,18 @@ class User < ApplicationRecord
   end
 
   def avatar_url
-    if photo.attached?
+    if displayable_photo_attached?
       photo
     else
       # Generate a default avatar URL or use initials
       nil
     end
+  end
+
+  def displayable_photo_attached?
+    persisted? && photo.attached? && photo.blob&.persisted?
+  rescue StandardError
+    false
   end
 
   private
@@ -143,7 +150,7 @@ class User < ApplicationRecord
   # validates :photo, size: { less_than: 5.megabytes, message: 'must be less than 5MB' }
 
   def avatar_url
-    if photo.attached?
+    if displayable_photo_attached?
       photo
     else
       # Generate a default avatar URL or use initials

@@ -2,6 +2,7 @@ class Property < ApplicationRecord
   belongs_to :project
   belongs_to :user
   has_many :property_costs, dependent: :destroy
+  has_many :construction_estimates, dependent: :nullify
   has_many :leads
   has_many :interests, dependent: :destroy
   has_many_attached :images

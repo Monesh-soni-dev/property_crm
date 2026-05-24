@@ -42,7 +42,7 @@
         <div class="flex items-center space-x-8">
           <div class="relative group">
             <div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-xl transform transition-transform duration-200 group-hover:scale-105">
-              <% if @user.photo.attached? %>
+              <% if @user.displayable_photo_attached? %>
                 <%= image_tag @user.photo, class: "w-full h-full object-cover" %>
               <% else %>
                 <div class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
@@ -75,7 +75,7 @@
               </p>
             </div>
             
-            <% if @user.photo.attached? %>
+            <% if @user.displayable_photo_attached? %>
               <div class="flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <%= f.check_box :remove_photo, class: "rounded border-yellow-300 text-blue-600 focus:ring-blue-500" %>
                 <span class="ml-2 text-sm text-yellow-800">Remove current photo</span>

@@ -1,0 +1,10 @@
+<p>Hello <%= @construction_estimate.user.full_name %>,</p>
+
+<p>Your construction estimate for <%= @construction_estimate.city %> is attached.</p>
+
+<p>
+  Total estimate: <strong><%= number_to_currency(@construction_estimate.total_estimated_cost, unit: '₹') %></strong><br>
+  Cost per sqft: <strong><%= number_to_currency(@construction_estimate.cost_per_sqft, unit: '₹') %></strong>
+</p>
+
+<p>Regards,<br>PlotPlans Team</p>

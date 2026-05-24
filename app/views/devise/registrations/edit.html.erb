@@ -13,7 +13,7 @@
       <h3 class="text-lg font-medium text-gray-900 mb-4">Profile Photo</h3>
       <div class="flex items-center space-x-6">
         <div class="shrink-0">
-          <% if current_user.photo.attached? %>
+          <% if current_user.displayable_photo_attached? %>
             <div class="w-24 h-24 rounded-full overflow-hidden">
               <%= image_tag current_user.photo, class: "w-full h-full object-cover" %>
             </div>
@@ -30,7 +30,7 @@
               accept: "image/png, image/jpg, image/jpeg",
               onchange: "previewEditPhoto(event)" %>
           <p class="text-xs text-gray-500 mt-1">PNG, JPG, or JPEG (max 5MB)</p>
-          <% if current_user.photo.attached? %>
+          <% if current_user.displayable_photo_attached? %>
             <div class="mt-3">
               <label class="flex items-center">
                 <%= f.check_box :remove_photo, class: "rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
