@@ -23,6 +23,15 @@ Rails.application.routes.draw do
   resources :properties
   resources :interests, only: [:index]
   resources :property_costs
+
+  resources :construction_estimates do
+    collection do
+      post :calculate_costs
+    end
+    member do
+      get :export_pdf
+    end
+  end
   resources :leads do
     member { patch :update_stage }
     resources :activities, only: [:create, :destroy]
