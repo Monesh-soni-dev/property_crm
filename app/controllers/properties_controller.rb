@@ -8,12 +8,15 @@ class PropertiesController < ApplicationController
     # Root page should show all public properties. The signed-in user's dashboard (/properties)
     # shows only their own properties via policy scope.
     if request.path == root_path || request.path == '/'
-      @properties = Property.includes(:project).where.not(status: 'sold')
+      @properties = Property.includes(:project).where(status: 'available')
+    elsif request.path == '/properties'
+      @properties = policy_scope(Property).includes(:project)
+      authorize Property
     elsif user_signed_in?
-      @properties = policy_scope(Property).includes(:project).where.not(status: 'sold')
+      @properties = policy_scope(Property).includes(:project).where(status: 'available')
       authorize Property
     else
-      @properties = Property.includes(:project).where.not(status: 'sold')
+      @properties = Property.includes(:project).where(status: 'available')
     end
     
     # Handle search if ransack is available
