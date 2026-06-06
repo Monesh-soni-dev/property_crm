@@ -13,7 +13,7 @@
     </div>
 
     <!-- ── FILTER BAR ─────────────────────────────────────────────────── -->
-    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+
       <% form_with url: property_costs_path, method: :get, local: true,
           class: "flex flex-wrap items-end gap-3" do |f| %>
 
@@ -64,7 +64,7 @@
               class: "px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors" %>
         </div>
       <% end %>
-    </div>
+
 
     <!-- Active filter pills -->
     <% if @filter_property || @filter_project || @filter_category || @filter_query %>

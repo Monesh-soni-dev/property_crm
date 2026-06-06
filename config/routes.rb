@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   post '/phone_login/verify', to: 'phone_otp#check'
   root 'properties#index'
   get '/dashboard', to: 'dashboard#index'
+  get '/reports',   to: 'reports#index', as: :reports
 
   # Error pages
   get '/404', to: 'errors#not_found', as: :not_found

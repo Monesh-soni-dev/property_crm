@@ -56,6 +56,36 @@ class LeadsController < ApplicationController
       @leads = @leads.where('follow_up_date >= ?', Date.current)
     end
     
+    # Apply creation date filters
+    case params[:created_date]
+    when 'today'
+      @leads = @leads.where(created_at: Date.current.beginning_of_day..Date.current.end_of_day)
+    when 'yesterday'
+      @leads = @leads.where(created_at: Date.yesterday.beginning_of_day..Date.yesterday.end_of_day)
+    when 'custom'
+      if params[:start_date].present? && params[:end_date].present?
+        begin
+          start_date = Date.parse(params[:start_date])
+          end_date = Date.parse(params[:end_date])
+          
+          # Ensure start date is before or equal to end date
+          if start_date > end_date
+            start_date, end_date = end_date, start_date
+          end
+          
+          # Enforce 31 days limit
+          if (end_date - start_date).to_i > 31
+            flash.now[:alert] = "Custom date range cannot exceed 31 days."
+            end_date = start_date + 31.days
+          end
+          
+          @leads = @leads.where(follow_up_date: start_date.beginning_of_day..end_date.end_of_day)
+        rescue ArgumentError
+          # Invalid date format, ignore
+        end
+      end
+    end
+    
     # Order by most recent
     @leads = @leads.order(created_at: :desc)
 
