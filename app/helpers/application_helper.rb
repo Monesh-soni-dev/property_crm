@@ -1,4 +1,30 @@
 module ApplicationHelper
+  STAGE_COLORS = {
+    'new_lead'        => '#3b82f6',
+    'contacted'       => '#f59e0b',
+    'interested'      => '#10b981',
+    'visit_scheduled' => '#8b5cf6',
+    'negotiation'     => '#ec4899',
+    'closed'          => '#059669',
+    'rejected'        => '#ef4444'
+  }.freeze
+
+  PROPERTY_STATUS_COLORS = {
+    'available'   => '#10b981',
+    'blocked'     => '#f59e0b',
+    'booked'      => '#3b82f6',
+    'registered'  => '#8b5cf6',
+    'sold'        => '#ef4444'
+  }.freeze
+
+  def stage_select_color(stage)
+    STAGE_COLORS[stage.to_s] || '#94a3b8'
+  end
+
+  def property_status_color(status)
+    PROPERTY_STATUS_COLORS[status.to_s] || '#94a3b8'
+  end
+
   def nav_link(label, path)
     active = current_page?(path) || request.path.start_with?(path.to_s)
     css = active ? "bg-white/15 text-white font-medium" : "text-white/75 hover:bg-white/10 hover:text-white"

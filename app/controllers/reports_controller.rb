@@ -1,13 +1,18 @@
 class ReportsController < ApplicationController
   before_action :authenticate_user!
+  before_action :authorize_reports_access!
   before_action :set_date_range
+  before_action :set_report_section
+  before_action :set_stage_filter
+  before_action :set_property_status_filter
 
   ITEMS_PER_PAGE = 15
 
   def index
-    # --- Base scoped queries (filtered by date) ---
     leads_scope      = current_user.leads.where(created_at: @start_date.beginning_of_day..@end_date.end_of_day)
+    leads_scope      = leads_scope.where(stage: @stage_filter) if @stage_filter.present?
     properties_scope = current_user.properties.where(created_at: @start_date.beginning_of_day..@end_date.end_of_day)
+    properties_scope = properties_scope.where(status: @property_status_filter) if @property_status_filter.present?
     costs_scope      = PropertyCost.where(user_id: current_user.id).where(cost_date: @start_date..@end_date)
 
     # --- 1. LEADS ---
@@ -36,9 +41,9 @@ class ReportsController < ApplicationController
     respond_to do |format|
       format.html do
         # Paginate only for HTML
-        @pagy_leads,      @leads      = pagy(leads_scope.includes(:project).order(created_at: :desc),      limit: ITEMS_PER_PAGE, page_param: :leads_page)
-        @pagy_properties, @properties = pagy(properties_scope.includes(:project).order(created_at: :desc), limit: ITEMS_PER_PAGE, page_param: :properties_page)
-        @pagy_costs,      @costs      = pagy(costs_scope.includes(:project).order(cost_date: :desc),       limit: ITEMS_PER_PAGE, page_param: :costs_page)
+        @pagy_leads,      @leads      = pagy(leads_scope.includes(:project).order(created_at: :desc),      limit: ITEMS_PER_PAGE, page_key: 'leads_page')
+        @pagy_properties, @properties = pagy(properties_scope.includes(:project).order(created_at: :desc), limit: ITEMS_PER_PAGE, page_key: 'properties_page')
+        @pagy_costs,      @costs      = pagy(costs_scope.includes(:project).order(cost_date: :desc),       limit: ITEMS_PER_PAGE, page_key: 'costs_page')
       end
       format.csv do
         # Full (unpaginated) data for CSV
@@ -52,17 +57,53 @@ class ReportsController < ApplicationController
 
   private
 
+  # ── Access guard ───────────────────────────────────────────────
+  def authorize_reports_access!
+    unless current_user.builder? || current_user.agent?
+      redirect_to dashboard_path, alert: 'You are not authorized to access Reports & Analytics.'
+    end
+  end
+
+  # ── Report section ──────────────────────────────────────────────
+  def set_report_section
+    @report_section = params[:report_section].presence.in?(%w[leads properties costs]) ? params[:report_section] : 'leads'
+  end
+
+  # ── Stage filter ────────────────────────────────────────────────────
+  def set_stage_filter
+    requested = params[:stage].presence
+    @stage_filter = Lead.stages.key?(requested) ? requested : nil
+  end
+
+  # ── Property status filter ──────────────────────────────────────────
+  def set_property_status_filter
+    requested = params[:property_status].presence
+    @property_status_filter = Property.statuses.key?(requested) ? requested : nil
+  end
+
   # ── Date range helpers ──────────────────────────────────────────────
   def set_date_range
     @range_preset = params[:range].presence || 'all'
 
     case @range_preset
+    when 'today'
+      @start_date = Date.current
+      @end_date   = Date.current
     when 'yesterday'
       @start_date = Date.yesterday
       @end_date   = Date.yesterday
     when '1_week'
       @start_date = 1.week.ago.to_date
       @end_date   = Date.current
+    when 'last_30_days'
+      @start_date = 30.days.ago.to_date
+      @end_date   = Date.current
+    when 'this_month'
+      @start_date = Date.current.beginning_of_month
+      @end_date   = Date.current.end_of_month.to_date
+    when 'last_month'
+      @start_date = 1.month.ago.beginning_of_month.to_date
+      @end_date   = 1.month.ago.end_of_month.to_date
     when 'custom'
       @start_date = params[:start_date].present? ? Date.parse(params[:start_date]) : 30.days.ago.to_date
       @end_date   = params[:end_date].present?   ? Date.parse(params[:end_date])   : Date.current

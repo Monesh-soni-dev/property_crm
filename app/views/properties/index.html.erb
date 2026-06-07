@@ -275,14 +275,14 @@
             <div class="flex items-center text-blue-600 font-medium text-sm flex-shrink-0 ml-2">
               <% if user_signed_in? %>
                 <% property_url = @project ? project_property_path(@project, property) : property_path(property) %>
-                <%= link_to property_url, class: "flex items-center group-hover:text-blue-800 cursor-pointer whitespace-nowrap" do %>
+                <%= link_to property_url, class: "flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm cursor-pointer whitespace-nowrap" do %>
                   View Details
                   <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                   </svg>
                 <% end %>
               <% else %>
-                <%= link_to new_user_registration_path, class: "flex items-center group-hover:text-blue-800 cursor-pointer whitespace-nowrap" do %>
+                <%= link_to new_user_registration_path, class: "flex items-center text-blue-600 hover:text-blue-800 font-medium text-sm cursor-pointer whitespace-nowrap" do %>
                   Sign Up to View
                   <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

@@ -87,10 +87,9 @@ class User < ApplicationRecord
   end
 
   def avatar_url
-    if photo.attached?
+    if persisted? && photo.attached? && photo.blob.persisted?
       photo
     else
-      # Generate a default avatar URL or use initials
       nil
     end
   end
@@ -141,13 +140,4 @@ class User < ApplicationRecord
   # Photo validation will be handled in the controller
   # validates :photo, content_type: { in: ['image/png', 'image/jpg', 'image/jpeg'], message: 'must be a PNG, JPG, or JPEG' },
   # validates :photo, size: { less_than: 5.megabytes, message: 'must be less than 5MB' }
-
-  def avatar_url
-    if photo.attached?
-      photo
-    else
-      # Generate a default avatar URL or use initials
-      nil
-    end
-  end
 end

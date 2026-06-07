@@ -47,7 +47,6 @@ class PropertiesController < ApplicationController
           .group(:property_id).count
       end
     end
-    @cities        = Property.where.not(city: [nil, '']).distinct.order(:city).pluck(:city)
     @project_names = Project.order(:name).pluck(:name)
   end
 
