@@ -32,11 +32,13 @@
           <%= link_to root_path, class: "block text-slate-400 hover:text-blue-400 transition-colors duration-200 hover:translate-x-1 transform" do %>
             Dashboard
           <% end %>
-          <%= link_to properties_path, class: "block text-slate-400 hover:text-blue-400 transition-colors duration-200 hover:translate-x-1 transform" do %>
-            Properties
-          <% end %>
-          <%= link_to projects_path, class: "block text-slate-400 hover:text-blue-400 transition-colors duration-200 hover:translate-x-1 transform" do %>
-            Projects
+          <% if user_signed_in? && current_user.builder? %>
+            <%= link_to properties_path, class: "block text-slate-400 hover:text-blue-400 transition-colors duration-200 hover:translate-x-1 transform" do %>
+              Properties
+            <% end %>
+            <%= link_to projects_path, class: "block text-slate-400 hover:text-blue-400 transition-colors duration-200 hover:translate-x-1 transform" do %>
+              Projects
+            <% end %>
           <% end %>
         </div>
       </div>
@@ -107,10 +109,10 @@
             <svg class="w-4 h-4 text-rose-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
             </svg>
-            Built with Rails & Tailwind CSS
+            Build for Transforming property management 
           </span>
           <span class="hidden md:inline text-slate-600">•</span>
-          <span>Version 2.1.0</span>
+          <span>Version 1.0</span>
         </div>
         
         <div class="flex items-center gap-6">
