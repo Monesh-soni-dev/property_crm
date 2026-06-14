@@ -1,0 +1,262 @@
+<%
+  pct             = @construction.overall_progress
+  days            = @construction.days_remaining
+  done_phases     = @phases.count { |p| p.status == 'completed' }
+  active_phase    = @phases.find { |p| p.status == 'in_progress' }
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Home Construction — <%= @construction.name %></title>
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "tailwind", "application", media: "all" %>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .phase-step::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -12px;
+      width: 2px;
+      background: linear-gradient(to bottom, #e5e7eb, #e5e7eb);
+    }
+    .phase-step.done::before { background: linear-gradient(to bottom, #22c55e, #22c55e); }
+    .phase-step.active::before { background: linear-gradient(to bottom, #3b82f6, #e5e7eb); }
+    .phase-step:last-child::before { display: none; }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- Hero -->
+<div class="bg-gradient-to-br from-[#0d1f35] via-[#1a2e4a] to-[#1e3a5f] text-white pb-8">
+  <div class="max-w-2xl mx-auto px-4 pt-8 text-center">
+
+    <!-- Brand -->
+    <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs text-blue-200 mb-5" style="background:rgba(255,255,255,0.12)">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+      </svg>
+      PlotPlans · Live Construction Tracker
+    </div>
+
+    <h1 class="text-3xl sm:text-4xl font-bold font-['Playfair_Display'] mb-1">Your Home is Being Built!</h1>
+    <h2 class="text-xl font-semibold text-blue-200 mb-1"><%= @construction.name %></h2>
+
+    <% if @construction.address.present? || @construction.city.present? %>
+      <p class="text-blue-300 text-sm">📍 <%= [@construction.address, @construction.city].compact.join(', ') %></p>
+    <% end %>
+
+    <!-- Big Progress Ring -->
+    <div class="mt-8 flex flex-col items-center">
+      <div class="relative w-44 h-44">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none"/>
+          <circle cx="50" cy="50" r="42"
+                  stroke="<%= pct >= 80 ? '#4ade80' : pct >= 50 ? '#60a5fa' : pct >= 25 ? '#fbbf24' : '#fb923c' %>"
+                  stroke-width="8" fill="none"
+                  stroke-dasharray="<%= (pct / 100.0 * 263.9).round(1) %> 263.9"
+                  stroke-linecap="round"/>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span class="text-5xl font-bold"><%= pct %>%</span>
+          <span class="text-blue-200 text-sm mt-1">Complete</span>
+        </div>
+      </div>
+
+      <!-- Pills -->
+      <div class="flex flex-wrap justify-center gap-2 mt-5 text-sm">
+        <span class="rounded-full px-3 py-1.5" style="background:rgba(255,255,255,0.12)">
+          🏗 <strong><%= done_phases %></strong>/<%= @phases.count %> phases done
+        </span>
+        <% if active_phase %>
+          <span class="bg-blue-700 rounded-full px-3 py-1.5 text-blue-100">
+            🔨 Now: <strong><%= active_phase.name %></strong>
+          </span>
+        <% end %>
+        <% if days %>
+          <span class="<%= days < 0 ? 'bg-red-700' : days <= 30 ? 'bg-amber-700' : 'bg-green-700' %> rounded-full px-3 py-1.5">
+            <%= days < 0 ? "⚠️ #{days.abs} days overdue" : days == 0 ? "🎉 Due today!" : "📅 #{days} days to go" %>
+          </span>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="mt-6 flex justify-center gap-8 text-sm border-t border-slate-600 pt-5">
+      <div class="text-center">
+        <p class="text-blue-400 text-xs uppercase tracking-wide">Work Started</p>
+        <p class="font-semibold mt-0.5"><%= @construction.start_date&.strftime("%d %b %Y") || 'TBD' %></p>
+      </div>
+      <div class="w-px bg-slate-600"></div>
+      <div class="text-center">
+        <p class="text-blue-400 text-xs uppercase tracking-wide">Expected Handover</p>
+        <p class="font-semibold mt-0.5"><%= @construction.expected_completion&.strftime("%d %b %Y") || 'TBD' %></p>
+      </div>
+      <% if @construction.total_built_area.present? %>
+        <div class="w-px bg-slate-600"></div>
+        <div class="text-center">
+          <p class="text-blue-400 text-xs uppercase tracking-wide">Built Area</p>
+          <p class="font-semibold mt-0.5"><%= @construction.total_built_area.to_i %> sq ft</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+
+  <!-- Builder message -->
+  <% if @construction.customer_notes.present? %>
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-8 flex gap-3">
+      <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-blue-800 mb-1">Message from your Builder</p>
+        <p class="text-sm text-blue-700 leading-relaxed"><%= @construction.customer_notes %></p>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Phase Strip -->
+  <div class="bg-white rounded-2xl border border-gray-200 p-5 mb-8">
+    <p class="text-sm font-semibold text-gray-700 mb-3">Construction Phases at a Glance</p>
+    <div class="flex gap-0.5 h-4 rounded-full overflow-hidden mb-2">
+      <% @phases.each do |ph| %>
+        <div class="flex-1 <%= ph.status == 'completed' ? 'bg-green-500' : ph.status == 'in_progress' ? 'bg-blue-500 animate-pulse' : 'bg-gray-100' %>"
+             title="<%= ph.name %>"></div>
+      <% end %>
+    </div>
+    <div class="flex gap-4 text-xs text-gray-400">
+      <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-green-500 rounded-sm"></span>Completed</span>
+      <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span>In Progress</span>
+      <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-gray-100 border border-gray-200 rounded-sm"></span>Upcoming</span>
+    </div>
+  </div>
+
+  <!-- Detailed Phase Timeline -->
+  <h3 class="text-lg font-bold text-gray-900 mb-1">Detailed Build Timeline</h3>
+  <p class="text-sm text-gray-400 mb-6">Updated by your builder in real-time</p>
+
+  <% if @phases.empty? %>
+    <div class="text-center py-12 bg-white rounded-2xl border border-dashed border-gray-200">
+      <p class="text-gray-400">Phase details will appear here once your builder sets them up.</p>
+    </div>
+  <% else %>
+    <div>
+      <% @phases.each_with_index do |phase, idx| %>
+        <%
+          is_done   = phase.status == 'completed'
+          is_active = phase.status == 'in_progress'
+          is_hold   = phase.status == 'on_hold'
+          pct_p     = phase.completion_pct.to_i
+          is_last   = idx == @phases.length - 1
+        %>
+
+        <div class="flex gap-4 mb-4">
+          <!-- Left: Icon + line -->
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center shadow-md z-10
+              <%= is_done ? 'bg-green-500' : is_active ? 'bg-blue-500' : is_hold ? 'bg-amber-400' : 'bg-white border-2 border-gray-200' %>">
+              <% if is_done %>
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+              <% elsif is_active %>
+                <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+              <% elsif is_hold %>
+                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+              <% else %>
+                <span class="text-gray-400 font-bold text-sm"><%= idx + 1 %></span>
+              <% end %>
+            </div>
+            <% unless is_last %>
+              <div class="flex-1 w-0.5 mt-1 mb-1 min-h-4 <%= is_done ? 'bg-green-400' : is_active ? 'bg-blue-200' : 'bg-gray-200' %>"></div>
+            <% end %>
+          </div>
+
+          <!-- Right: Card -->
+          <div class="flex-1 pb-2">
+            <div class="bg-white rounded-2xl border shadow-sm p-4
+              <%= is_done ? 'border-green-200 bg-green-50' : is_active ? 'border-blue-200 bg-blue-50 ring-1 ring-blue-200' : is_hold ? 'border-amber-200' : 'border-gray-200' %>">
+
+              <div class="flex items-start justify-between gap-2">
+                <h4 class="font-semibold text-gray-900 text-sm"><%= phase.name %></h4>
+                <span class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0
+                  <%= is_done ? 'bg-green-100 text-green-700' : is_active ? 'bg-blue-100 text-blue-700' : is_hold ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-400' %>">
+                  <%= is_done ? '✓ Done' : is_active ? '● In Progress' : is_hold ? '⏸ On Hold' : 'Upcoming' %>
+                </span>
+              </div>
+
+              <% if phase.description.present? %>
+                <p class="text-xs text-gray-500 mt-1 leading-relaxed"><%= phase.description %></p>
+              <% end %>
+
+              <!-- Progress bar -->
+              <div class="mt-3">
+                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                  <span>Completion</span>
+                  <span class="font-bold text-gray-700"><%= pct_p %>%</span>
+                </div>
+                <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-700
+                    <%= is_done ? 'bg-green-500' : is_active ? 'bg-blue-500' : is_hold ? 'bg-amber-400' : 'bg-gray-200' %>"
+                       style="width:<%= pct_p %>%"></div>
+                </div>
+              </div>
+
+              <!-- Dates -->
+              <div class="mt-2 flex flex-wrap gap-3 text-xs text-gray-400">
+                <% if phase.planned_start && phase.planned_end %>
+                  <span>📅 <%= phase.planned_start.strftime("%d %b") %> – <%= phase.planned_end.strftime("%d %b %Y") %></span>
+                <% end %>
+                <% if phase.actual_start %>
+                  <span class="text-blue-500">🔨 Started <%= phase.actual_start.strftime("%d %b %Y") %></span>
+                <% end %>
+                <% if phase.actual_end %>
+                  <span class="text-green-600">✅ Completed <%= phase.actual_end.strftime("%d %b %Y") %></span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Contact Builder -->
+  <% if @construction.client_name.present? || @construction.site_manager.present? %>
+    <div class="bg-gray-800 rounded-2xl p-5 mt-8 text-white">
+      <h3 class="font-semibold text-sm mb-4 text-gray-300">Contact Your Site Team</h3>
+      <% if @construction.site_manager.present? %>
+        <div class="flex items-center justify-between gap-4 py-3 border-b border-gray-700">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-400">Site Engineer</p>
+              <p class="text-sm font-semibold"><%= @construction.site_manager %></p>
+              <% if @construction.site_manager_phone.present? %>
+                <p class="text-sm text-gray-300 mt-0.5"><%= @construction.site_manager_phone %></p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Footer -->
+  <div class="text-center mt-10 py-5 border-t border-gray-200">
+    <p class="text-gray-400 text-sm">Powered by <strong class="text-[#1a2e4a]">PlotPlans</strong> · Construction Tracker</p>
+    <p class="text-gray-400 text-xs mt-0.5">This page is updated by your builder in real-time.</p>
+  </div>
+</div>
+</body>
+</html>

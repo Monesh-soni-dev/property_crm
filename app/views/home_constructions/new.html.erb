@@ -1,0 +1,15 @@
+<div class="flex items-center gap-3 mb-6">
+  <%= link_to home_constructions_path, class: "text-gray-400 hover:text-gray-600 transition" do %>
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  <% end %>
+  <div>
+    <h1 class="text-xl font-bold text-gray-900 font-['Playfair_Display']">New Construction Job</h1>
+    <p class="text-sm text-gray-400 mt-0.5">Default building phases will be added automatically</p>
+  </div>
+</div>
+
+<div class="max-w-3xl">
+  <%= render 'form', construction: @construction %>
+</div>

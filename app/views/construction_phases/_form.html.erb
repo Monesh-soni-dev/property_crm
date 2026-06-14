@@ -1,0 +1,85 @@
+<!-- Phase form partial -->
+<div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+  <%= form_with model: [@construction, phase] do |f| %>
+    <% if phase.errors.any? %>
+      <div class="px-6 py-3 bg-red-50 border-b border-red-100">
+        <ul class="text-sm text-red-600 list-disc list-inside">
+          <% phase.errors.full_messages.each do |m| %><li><%= m %></li><% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="px-6 py-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <%= f.label :name, "Phase Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_field :name, placeholder: "e.g. Foundation Work", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" %>
+      </div>
+
+      <div class="md:col-span-2">
+        <%= f.label :description, "Description (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_area :description, rows: 2, placeholder: "What happens in this phase...", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" %>
+      </div>
+
+      <div>
+        <%= f.label :status, "Status", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.select :status,
+            options_for_select([
+              ['Pending', 'pending'],
+              ['In Progress', 'in_progress'],
+              ['On Hold', 'on_hold'],
+              ['Completed', 'completed']
+            ], phase.status || 'pending'),
+            {},
+            class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white" %>
+      </div>
+
+      <div>
+        <%= f.label :completion_pct, "Completion %", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <div class="flex items-center gap-3">
+          <%= f.range_field :completion_pct, min: 0, max: 100, step: 5, value: phase.completion_pct || 0,
+              class: "flex-1",
+              oninput: "this.nextElementSibling.textContent = this.value + '%'" %>
+          <span class="w-12 text-center font-bold text-orange-500 text-sm"><%= (phase.completion_pct || 0) %>%</span>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :phase_order, "Display Order", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.number_field :phase_order, min: 1, placeholder: "1", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" %>
+      </div>
+
+      <div>
+        <%= f.label :planned_start, "Planned Start", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.date_field :planned_start, class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" %>
+      </div>
+
+      <div>
+        <%= f.label :planned_end, "Planned End", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.date_field :planned_end, class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" %>
+      </div>
+
+      <div>
+        <%= f.label :actual_start, "Actual Start Date", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.date_field :actual_start, class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" %>
+      </div>
+
+      <div>
+        <%= f.label :actual_end, "Actual Completion Date", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.date_field :actual_end, class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" %>
+      </div>
+
+      <div class="md:col-span-2">
+        <%= f.label :notes, "Internal Notes", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= f.text_area :notes, rows: 2, placeholder: "Site notes, materials, observations...", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" %>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 bg-gray-50 flex items-center justify-between">
+      <%= link_to "Cancel", home_construction_path(@construction), class: "text-sm text-gray-500 hover:text-gray-700 transition" %>
+      <%= f.button phase.persisted? ? "Update Phase" : "Add Phase",
+          type: :submit,
+          class: "inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition cursor-pointer border-0" %>
+    </div>
+    </div>
+  <% end %>
+</div>

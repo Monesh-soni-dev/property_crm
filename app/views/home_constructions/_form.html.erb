@@ -1,0 +1,198 @@
+<!-- Shared form partial for HomeConstruction new/edit -->
+<div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+  <%= form_with model: construction, class: "divide-y divide-gray-100" do |f| %>
+    <% if construction.errors.any? %>
+      <div class="px-6 py-4 bg-red-50 border-b border-red-100">
+        <p class="text-sm font-semibold text-red-700 mb-1"><%= construction.errors.count %> error(s) found:</p>
+        <ul class="list-disc list-inside text-sm text-red-600">
+          <% construction.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <!-- Section: Basic Info -->
+    <div class="px-6 py-5">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Construction Details</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <%= f.label :name, "Construction Name / Title", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_field :name, placeholder: "e.g. Mr. Sharma's 2BHK Villa", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+
+        <div class="md:col-span-2">
+          <%= f.label :address, "Site Address", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_field :address, placeholder: "Plot No, Street, Area", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+
+        <div>
+          <%= f.label :city, "City", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_field :city, placeholder: "City", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+
+        <div>
+          <%= f.label :site_manager, "Site Engineer / Supervisor Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_field :site_manager, placeholder: "Engineer / Supervisor name", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+
+        <div>
+          <%= f.label :site_manager_phone, "Site Engineer Mobile Number", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.telephone_field :site_manager_phone,
+              value: (construction.site_manager_phone.presence || "+91"),
+              placeholder: "+91XXXXXXXXXX",
+              inputmode: "tel",
+              maxlength: 13,
+              data: { phone_field: true },
+              class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+          <p class="text-xs text-gray-400 mt-1">+91 is fixed &mdash; enter your 10-digit mobile number after it</p>
+        </div>
+
+        <div>
+          <%= f.label :total_built_area, "Built Area (sq ft)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :total_built_area, placeholder: "1200", step: "any", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+
+        <div>
+          <%= f.label :number_of_floors, "Number of Floors", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.number_field :number_of_floors, placeholder: "2", min: 1, class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+
+        <div>
+          <%= f.label :status, "Current Status", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.select :status,
+              options_for_select([
+                ['Planning', 'planning'],
+                ['In Progress', 'in_progress'],
+                ['On Hold', 'on_hold'],
+                ['Completed', 'completed']
+              ], construction.status),
+              { include_blank: "-- Select Status --" },
+              class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent bg-white" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Timeline -->
+    <div class="px-6 py-5">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Timeline</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :start_date, "Construction Start Date", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.date_field :start_date, class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+        <div>
+          <%= f.label :expected_completion, "Expected Completion Date", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.date_field :expected_completion, class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Client Info -->
+    <div class="px-6 py-5">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Client Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <%= f.label :client_name, "Client Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_field :client_name, placeholder: "Full name", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+        <div>
+          <%= f.label :client_phone, "Client Phone", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.telephone_field :client_phone,
+              value: (construction.client_phone.presence || "+91"),
+              placeholder: "+91XXXXXXXXXX",
+              inputmode: "tel",
+              maxlength: 13,
+              data: { phone_field: true },
+              class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+          <p class="text-xs text-gray-400 mt-1">+91 is fixed &mdash; enter your 10-digit mobile number after it</p>
+        </div>
+        <div>
+          <%= f.label :client_email, "Client Email", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.email_field :client_email, placeholder: "client@example.com", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Notes -->
+    <div class="px-6 py-5">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Notes & Description</h3>
+      <div class="grid grid-cols-1 gap-4">
+        <div>
+          <%= f.label :description, "Internal Description", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_area :description, rows: 3, placeholder: "Type of construction, materials used, any special notes...", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none" %>
+        </div>
+        <div>
+          <%= f.label :customer_notes, "Message to Customer (shown on customer tracker)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= f.text_area :customer_notes, rows: 3, placeholder: "e.g. Dear Mr. Sharma, we are on schedule and your home is progressing well...", class: "w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="px-6 py-4 bg-gray-50 flex items-center justify-between gap-3">
+      <%= link_to "Cancel", home_constructions_path, class: "text-sm text-gray-500 hover:text-gray-700 transition" %>
+      <%= f.button construction.persisted? ? "Save Changes" : "Create & Add Phases",
+          type: :submit,
+          class: "inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition cursor-pointer border-0" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  var PREFIX = '+91';
+
+  document.querySelectorAll('[data-phone-field]').forEach(function(input) {
+    // Ensure prefix is always present on load
+    if (!input.value.startsWith(PREFIX)) {
+      input.value = PREFIX;
+    }
+
+    function enforcePrefix() {
+      if (!input.value.startsWith(PREFIX)) {
+        input.value = PREFIX;
+      }
+      // Allow only digits after the prefix, max 10
+      var digits = input.value.slice(PREFIX.length).replace(/[^0-9]/g, '').slice(0, 10);
+      input.value = PREFIX + digits;
+      input.setCustomValidity(digits.length > 0 && digits.length < 10 ? 'Enter all 10 digits after +91' : '');
+    }
+
+    // Block backspace/delete/arrow-left from touching the prefix
+    input.addEventListener('keydown', function(e) {
+      var pos = this.selectionStart;
+      if ((e.key === 'Backspace' || e.key === 'Delete') && pos <= PREFIX.length) {
+        e.preventDefault();
+      }
+      // Block typing when already at max length (13)
+      if (this.value.length >= 13 && e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+      }
+    });
+
+    // Only allow digits after the prefix
+    input.addEventListener('keypress', function(e) {
+      if (!/[0-9]/.test(e.key)) e.preventDefault();
+    });
+
+    input.addEventListener('input', enforcePrefix);
+
+    // Move cursor past prefix on focus/click
+    input.addEventListener('focus', function() {
+      var pos = this.selectionStart;
+      if (pos < PREFIX.length) this.setSelectionRange(PREFIX.length, PREFIX.length);
+    });
+    input.addEventListener('click', function() {
+      if (this.selectionStart < PREFIX.length) this.setSelectionRange(PREFIX.length, PREFIX.length);
+    });
+
+    // Handle paste: strip non-digits, prepend prefix
+    input.addEventListener('paste', function(e) {
+      e.preventDefault();
+      var pasted = (e.clipboardData || window.clipboardData).getData('text');
+      var digits = pasted.replace(/[^0-9]/g, '').slice(0, 10);
+      this.value = PREFIX + digits;
+      enforcePrefix();
+    });
+  });
+</script>

@@ -36,6 +36,12 @@ Rails.application.routes.draw do
     resource :profile, controller: 'users', only: [:show, :edit, :update]
     resource :account_settings, only: [:edit, :update, :destroy]
   end  
+  # Standalone Construction Tracker (separate from projects)
+  resources :home_constructions do
+    resources :construction_phases
+  end
+  get '/tracker/:share_token', to: 'home_constructions#public_tracker', as: :public_construction_tracker
+
   resources :projects do
     resources :properties, except: [:index] do
       resources :interests, only: [:create]
