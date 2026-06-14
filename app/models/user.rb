@@ -94,6 +94,14 @@ class User < ApplicationRecord
     end
   end
 
+  def self.ransackable_associations(auth_object = nil)
+    ["leads", "photo_attachment", "photo_blob", "projects", "properties"]
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    ["address", "city", "created_at", "email", "encrypted_password", "first_name", "id", "id_value", "last_name", "mobile_number", "otp_code", "otp_sent_at", "pincode", "provider", "remember_created_at", "reset_password_sent_at", "reset_password_token", "role", "state", "uid", "updated_at"]
+  end
+
   private
 
   def remove_photo_if_checked

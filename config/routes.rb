@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
   # ActiveStorage routes
   mount ActiveStorage::Engine => "/rails/active_storage"
 
@@ -65,6 +67,7 @@ Rails.application.routes.draw do
   get '/privacy', to: 'pages#privacy', as: :privacy
   get '/terms', to: 'pages#terms', as: :terms
   get '/help', to: 'pages#help', as: :help
-  get '/contact', to: 'pages#contact', as: :contact 
+  get '/contact', to: 'pages#contact', as: :contact
+  post '/contact', to: 'contacts#create'
   get '/documentation', to: 'pages#documentation', as: :documentation
 end

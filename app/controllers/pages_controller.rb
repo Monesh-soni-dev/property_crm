@@ -19,6 +19,7 @@ class PagesController < ApplicationController
 
   def contact
     @page_title = "Contact Us"
+    @contact = Contact.new
   end
 
   def documentation

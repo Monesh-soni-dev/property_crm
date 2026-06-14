@@ -90,6 +90,15 @@ class Lead < ApplicationRecord
 
   after_update :sync_property_status   # blocks property when lead is booked
 
+  def self.ransackable_attributes(auth_object = nil)
+    ["budget", "created_at", "customer_email", "customer_name", "customer_phone", "follow_up_date", "id", "id_value", "notes", "project_id", "property_id", "property_location", "property_name", "property_type", "source", "stage", "updated_at", "user_id"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    ["activities", "project", "property", "user"]
+  end
+
+
   private
 
   def sync_property_status
