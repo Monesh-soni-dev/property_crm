@@ -1,4 +1,21 @@
 Rails.application.routes.draw do
+  namespace :api do
+    namespace :v1 do
+      post :signup, to: 'auth#signup'
+      post :login, to: 'auth#login'
+      resources :leads, only: [:index, :create, :show, :update] do
+        collection do
+          get :search
+        end
+      end
+      resources :properties, only: [:index, :show] do
+        collection do
+          get :search
+        end
+      end
+    end
+  end
+
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
   # ActiveStorage routes
