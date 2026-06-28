@@ -1,8 +1,8 @@
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable,
+    devise :database_authenticatable, :registerable,
+      :recoverable, :rememberable, :validatable, :confirmable,
          :omniauthable, omniauth_providers: [:google_oauth2]
 
   def self.from_omniauth(auth)
@@ -22,6 +22,7 @@ class User < ApplicationRecord
 
     user.provider = auth.provider
     user.uid      = auth.uid
+    user.confirmed_at ||= Time.current if user.respond_to?(:confirmed_at)
     user
   end
 

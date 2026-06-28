@@ -6,7 +6,9 @@ class Api::V1::AuthController < ActionController::API
     user.role = 'customer' if user.role.blank?
 
     if user.save
-      render json: success_payload(user), status: :created
+      render json: {
+        message: 'Signup successful. Please check your email and confirm your account before login.'
+      }, status: :created
     else
       render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
     end
@@ -16,6 +18,10 @@ class Api::V1::AuthController < ActionController::API
     user = find_user_for_login(login_params)
 
     if user&.valid_password?(login_params[:password])
+      unless user.active_for_authentication?
+        return render json: { error: user.inactive_message.to_s.humanize }, status: :unauthorized
+      end
+
       render json: success_payload(user), status: :ok
     else
       render json: { error: 'Invalid credentials or password' }, status: :unauthorized
